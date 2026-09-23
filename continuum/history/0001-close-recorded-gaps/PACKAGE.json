@@ -1,0 +1,96 @@
+{
+  "development-package": "continuum-development-package/1",
+  "name": "shortcut-recorder",
+  "generator": {
+    "tool": "tools/development-package.mjs",
+    "version": "0.1.0"
+  },
+  "goal": "GOAL.md",
+  "semantic": {
+    "package": "open.shortcutrecorder",
+    "version": "package-1",
+    "core": "adl/1.4",
+    "attestation": "sha256:dff39a05dbd50f14293b9660f7512a58ee4696c21e56421695fa41aa2d81a704",
+    "changeState": "sha256:187919c0305c3bd77f3bdee5e40577ccead8b1ee620148638574bfd22d3d2c9d",
+    "manifest": "model/shortcut-recorder.adl-manifest.json",
+    "documents": [
+      "model/shortcut-recorder.adl"
+    ],
+    "textProjection": "model/shortcut-recorder.adl.txt",
+    "proof": "model/compile-proof.json",
+    "warnings": 0
+  },
+  "change": null,
+  "environment": {
+    "name": "PackageDevelopment",
+    "id": "663e3ff6-f583-4281-89d0-91a9c9c27c4c",
+    "document": "model/package-development.adl-binding.json",
+    "bindingDigest": "sha256:434f604e554182bb1b695ca0477d9d690433762662ecf072c55ccf3009800e13"
+  },
+  "environments": [
+    {
+      "name": "PackageDevelopment",
+      "id": "663e3ff6-f583-4281-89d0-91a9c9c27c4c",
+      "document": "model/package-development.adl-binding.json",
+      "bindingDigest": "sha256:434f604e554182bb1b695ca0477d9d690433762662ecf072c55ccf3009800e13"
+    }
+  ],
+  "bindings": [
+    "model/package-development.adl-binding.json"
+  ],
+  "vocabularies": [
+    "model/open.shortcutrecorder.bindings.package.vocabulary-claims.json"
+  ],
+  "acceptance": {
+    "scenarios": "acceptance/scenarios",
+    "runner": "acceptance/run.mjs",
+    "fakeProvider": "acceptance/fake-model-provider.mjs",
+    "adapter": "acceptance/adapter.mjs",
+    "count": 2,
+    "names": [
+      "core-shortcut-behavior",
+      "integration-contract"
+    ],
+    "traces": [],
+    "executed": false,
+    "results": null,
+    "uncoveredRequirements": []
+  },
+  "implementation": "IMPLEMENTATION.md",
+  "behaviour": {
+    "document": "BEHAVIOUR.md",
+    "starts": 0,
+    "underspecified": 0
+  },
+  "readme": "README.md",
+  "controls": [],
+  "generated": [
+    "BEHAVIOUR.md",
+    "IMPLEMENTATION.md",
+    "README.md",
+    "acceptance/README.md",
+    "acceptance/fake-model-provider.mjs",
+    "acceptance/run.mjs",
+    "model/compile-proof.json",
+    "model/shortcut-recorder.adl.txt"
+  ],
+  "files": {
+    "BEHAVIOUR.md": "sha256:6629cf3c9dce564489064eb96340bb14e26d64143737104c4c56ebb21595f030",
+    "GOAL.md": "sha256:bc2cd7d39fc7e6882d1bf220381c5a924a11ad39b0e4100bc7268a01241f8aff",
+    "IMPLEMENTATION.md": "sha256:8d274ad7d15c596a7c1ac36ff7d3255394c3fcfbfe91c3b37fb8d62f1045cffb",
+    "README.md": "sha256:d39e94814adb17939fc530c7e84b969655470d2772ce9f33c66cc592c32b8aac",
+    "acceptance/README.md": "sha256:3d6ec72fb6a4afb9a4df2af3514edb709669367ac81ce8e34a05130f7416451a",
+    "acceptance/adapter.mjs": "sha256:d5bc7bfba190976f258c8f08000a3b2ffa71e1e4520250507f2d031318d78259",
+    "acceptance/fake-model-provider.mjs": "sha256:d2ec0ce524ca996865beef2c339c205deb9d7ad2610a1e7ff72a1b7732781b69",
+    "acceptance/run.mjs": "sha256:447dac8db77b8e1d93382e778b52ebd4fead29f0ef62b05e3a924717dea01370",
+    "acceptance/scenarios/core-shortcut-behavior.scenario.json": "sha256:f2e062e636c76b1112485d147630fd37e68197d8b4a83d41c9639b07dcb8ef49",
+    "acceptance/scenarios/integration-contract.scenario.json": "sha256:8c17c882d458116108333618105e5864a3b2cdae2b0466f20a06477578330178",
+    "development-package.json": "sha256:33b1088b23f7c16d4996b5e003185121264fd716b46c6b1f34559a48ddc63c3e",
+    "model/compile-proof.json": "sha256:d5826ddfd1dc05641093d7692cef52193b8de911816709afae4934abc6a899a3",
+    "model/open.shortcutrecorder.bindings.package.vocabulary-claims.json": "sha256:10f6519e4772ca296acc6b91f94bc71f4ef7ca84e43ed7582be50cb30fade1b2",
+    "model/package-development.adl-binding.json": "sha256:87eb3bcaff048ed9c8a9cc034455dcca92faefef81da6c9605ed42cdc68e45c2",
+    "model/shortcut-recorder.adl": "sha256:f8bf683287446af08ed0945f73b8576bd917e51686eb399cea305db64a6028cd",
+    "model/shortcut-recorder.adl-manifest.json": "sha256:54a2a80729c7ff5bb906b2996f9da61c77885fab83051750a821547f26bc1d79",
+    "model/shortcut-recorder.adl.txt": "sha256:e9f5d46d3d3a2262f0e7be3f2a9a9ca56dd2dc8c8396f9f5289c292feb2be066"
+  }
+}

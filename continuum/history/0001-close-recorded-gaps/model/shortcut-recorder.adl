@@ -1,0 +1,156 @@
+document semantic at :: {
+
+system ShortcutRecorder #575a473b-67b8-43a6-a71e-b4e676fa7278 {
+  desc "A reusable shortcut-recording system that captures, normalizes, presents, and validates user-defined keyboard shortcuts."
+
+  actor Maintainers #bf422242-ac4b-49be-be45-bb387c41a45d [team] {
+    desc "The team accountable for the shortcut-recording package and its public contract."
+    owns: ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine, ::ShortcutRecorder.ShortcutConfiguration.Shortcuts, ::ShortcutRecorder.ShortcutConfiguration
+  }
+  domain ShortcutConfiguration #f6a51635-137a-4be5-99ea-17e2a9a6034b {
+    desc "The business meaning of defining and validating user-configurable keyboard shortcuts."
+    classification = core
+
+    bounded-context Shortcuts #8c6d1529-5f2e-4358-9017-dbda5a1a84c9 {
+      desc "The authoritative language and behavior for captured shortcut chords, normalization, display, and assignment assessment."
+      realizes: ::ShortcutRecorder.ShortcutConfiguration.Normalization, ::ShortcutRecorder.ShortcutConfiguration.Recording, ::ShortcutRecorder.ShortcutConfiguration.IntegrationContract, ::ShortcutRecorder.ShortcutConfiguration.Presentation, ::ShortcutRecorder.ShortcutConfiguration.AssignmentSafety
+
+      business-rule ConflictReporting #fba97d30-7f5c-4ae4-b5a2-5c04255dc715 {
+        desc "Defines when an existing assignment is surfaced as a conflict."
+        statement "A candidate matching an existing normalized shortcut reports the matching binding as a conflict."
+      }
+      business-rule EscapeCancels #d3d51971-79c4-48ab-8626-81ec41c24041 {
+        desc "Defines cancellation while recording."
+        statement "Escape cancels the active recording and leaves the committed shortcut unchanged."
+      }
+      business-rule ModMapping #17d86d33-4d8a-4bc6-bd45-9709147e4dc5 {
+        desc "Defines the portable modifier mapping used during normalization."
+        statement "Mod resolves to Command on macOS and Control on other supported platforms."
+      }
+      business-rule ReservedWarning #72e58521-0894-4e9f-902f-06d17ad23577 {
+        desc "Defines handling for browser-reserved shortcut candidates."
+        statement "A recognized browser-reserved shortcut produces a warning rather than being treated as an ordinary unreserved assignment."
+      }
+      service ShortcutEngine #58320b7e-f3f8-4f64-9417-e20e8dd1a318 {
+        desc "Provides framework-independent shortcut normalization, presentation, assignment assessment, and recorder semantics for adapters."
+        applies: ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ModMapping, ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ReservedWarning, ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.EscapeCancels, ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ConflictReporting, ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.CanonicalShortcutForm, ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ReservedRecognition
+        realizes: ::ShortcutRecorder.ShortcutConfiguration.Normalization, ::ShortcutRecorder.ShortcutConfiguration.Recording, ::ShortcutRecorder.ShortcutConfiguration.IntegrationContract, ::ShortcutRecorder.ShortcutConfiguration.Presentation, ::ShortcutRecorder.ShortcutConfiguration.AssignmentSafety
+        satisfies: ::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.FrameworkAgnosticCore, ::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.ControlledAndUncontrolled, ::ShortcutRecorder.ShortcutConfiguration.Recording.KeyboardAccessibility, ::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.ServerRenderingSafe, ::ShortcutRecorder.ShortcutConfiguration.AssignmentSafety.ReservedShortcutWarning, ::ShortcutRecorder.ShortcutConfiguration.Normalization.PortableModifier, ::ShortcutRecorder.ShortcutConfiguration.AssignmentSafety.CollisionDetection, ::ShortcutRecorder.ShortcutConfiguration.Recording.EscapeCancellation, ::ShortcutRecorder.ShortcutConfiguration.Presentation.PrettyKeycaps, ::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.HeadlessByDefault
+
+        api RecorderApi #ff9fb049-86ef-4f7e-aa23-8f228838c736 {
+          desc "The synchronous semantic surface exposed to recorder adapters."
+
+          operation AssessShortcut #f6c641dd-3928-4dab-9b39-92419b8712d6 {
+            desc "Assesses a normalized shortcut for assignment conflicts and reserved-shortcut warnings."
+            in = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.AssessmentInput
+            out = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Assessment
+          }
+          operation FormatShortcut #4d8f1a70-0ab5-465c-b127-0fb1cc679839 {
+            desc "Formats a normalized shortcut as readable keycap display text."
+            in = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.FormatInput
+            out = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.KeycapDisplay
+          }
+          operation NormalizeShortcut #5b037dba-026b-4668-ad1d-ed41fe6c1015 {
+            desc "Normalizes a captured chord into the portable shortcut representation."
+            in = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.NormalizeInput
+            out = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Shortcut
+          }
+          operation StartRecording #68142f15-8d68-4d75-9990-ee980befdcb4 {
+            desc "Begins capturing a chord, leaving the committed shortcut untouched."
+            out = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.RecordingState
+          }
+          operation CancelRecording #90ca5175-d7cb-4109-8685-68798a07612d {
+            desc "Ends an active capture without replacing the committed shortcut."
+            out = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.RecordingState
+          }
+          operation CommitChord #aeca1ade-00fc-4b4e-9141-0abb6895362c {
+            desc "Normalizes a captured chord, ends the capture, and assesses the resulting shortcut for assignment problems."
+            in = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.NormalizeInput
+            out = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Assessment
+          }
+        }
+      }
+      record Assessment v1 #3053a974-d7e5-4fa7-b06f-6be30b1bf107 { conflict: optional(::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Conflict), reserved: boolean, shortcut: ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Shortcut }
+      record AssessmentInput v1 #c1601d56-0b91-4439-899e-8b01a621b094 { existing: list(::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ExistingBinding), platform: ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Platform, shortcut: ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Shortcut }
+      record Conflict v1 #76667b2a-5c14-4407-bf83-5e28e3080546 { bindingId: text, shortcut: ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Shortcut }
+      record ExistingBinding v1 #752d09f3-e816-43fc-9719-e593a76658b1 { id: text, shortcut: ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Shortcut }
+      record KeycapDisplay v1 #168db1bd-f1a9-451a-86de-f4bb32a7c90a { text: text }
+      record NormalizeInput v1 #6e555cdc-1eef-497d-b76d-a54f7acb9eb4 { chord: ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.RawChord, platform: ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Platform }
+      enum Platform v1 #6891a68d-a4f7-422b-8014-f84c8dad262d = macos | other
+      record RawChord v1 #03dddcba-738c-4f8c-be8d-7cb567406fd4 { alt: boolean, control: boolean, key: text, meta: boolean, shift: boolean }
+      alias Shortcut v1 #99b13ad2-d812-42e7-b7b4-39f0272c1316 = text !identity
+      business-rule CanonicalShortcutForm #2f615f9d-4f74-45e9-84e4-9a94486da893 {
+        desc "Defines the canonical text of a shortcut, on which shortcut identity rests."
+        statement "A shortcut's canonical text is its modifier tokens in the order Mod, Meta, Ctrl, Alt, Shift, followed by its key token, each separated by a plus sign; a single-character key token is upper case. Two shortcuts are the same shortcut exactly when their canonical texts are equal."
+      }
+      business-rule ReservedRecognition #a27aff2e-a275-4749-bec7-462557fa9623 {
+        desc "Defines which shortcuts count as browser-reserved, and how the absence of recognition is reported."
+        statement "A shortcut is recognized as browser-reserved when a mainstream browser acts on it before the page observes the key press, on the platform being assessed. The engine owns the recognition set. A shortcut the set does not name is reported as unreserved, which is the absence of recognition and not evidence that the shortcut is free."
+      }
+      record FormatInput v1 #4d719efa-37ee-4040-aaf5-7b1d7ece326a { shortcut: ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Shortcut, platform: ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Platform }
+      enum RecordingState v1 #07cf4ebc-0018-4227-8de1-b662f93f4619 = idle | recording
+    }
+    capability AssignmentSafety #f98f1fa9-5b85-4616-9e2c-ce58e7014fff {
+      desc "Assess whether a proposed shortcut conflicts with an existing assignment or a reserved browser shortcut."
+
+      requirement CollisionDetection #b0969156-3863-46bf-b38b-7ec60f66ddf3 {
+        desc "A shortcut already assigned to another binding is reported as a conflict identifying that binding."
+      }
+      requirement ReservedShortcutWarning #9256c0dd-f043-48a2-9353-a9b985e1a646 {
+        desc "A recognized browser-reserved shortcut is reported with a warning."
+      }
+    }
+    capability IntegrationContract #78a0f9c9-3a8b-4755-bd27-2edf35aa55ab {
+      desc "Expose the recorder through a portable integration contract suitable for framework adapters."
+
+      requirement ControlledAndUncontrolled #408dcddd-50df-4f24-9e8f-105a5ec3cbe7 {
+        desc "The integration contract supports both caller-controlled and internally managed shortcut state."
+      }
+      requirement FrameworkAgnosticCore #3e4d764a-e8f4-456a-a643-76b75b3b5742 {
+        desc "Shortcut capture semantics are available independently of any specific UI framework adapter."
+      }
+      requirement HeadlessByDefault #efdb0ac2-e555-4ace-9c5f-4f91bce795ee {
+        desc "The integration contract does not require package-defined visual styling."
+      }
+      requirement ServerRenderingSafe #86800933-440b-46cb-9a06-bbc6a46fb83c {
+        desc "Importing and rendering the integration does not require browser globals during server rendering."
+      }
+    }
+    capability Normalization #262823da-c0af-4385-83b9-58c053778580 {
+      desc "Convert captured key combinations into a stable portable shortcut representation."
+
+      requirement PortableModifier #99b7e7c2-e850-4b05-944f-512eb64b0994 {
+        desc "The portable Mod modifier represents Command on macOS and Control on other supported platforms."
+      }
+    }
+    capability Presentation #cb02706e-f7a7-41d8-9e82-1ec99fba77d7 {
+      desc "Present a normalized shortcut as readable keycap labels."
+
+      requirement PrettyKeycaps #bbb5f877-df76-4fd0-ad35-0562fdf70be2 {
+        desc "Normalized shortcuts can be rendered as platform-appropriate keycap labels such as Command, Shift, and P."
+      }
+    }
+    capability Recording #6beaf44c-7a01-458f-b9ca-1c957075a26e {
+      desc "Capture a user's keyboard shortcut candidate through keyboard-only interaction."
+
+      requirement EscapeCancellation #b919c692-35c2-4b10-9116-d0569acaa0b9 {
+        desc "Escape cancels an active recording without replacing the committed shortcut."
+      }
+      requirement KeyboardAccessibility #48d1049f-50aa-4974-9bd1-2a5380ca22e4 {
+        desc "Shortcut recording is operable by keyboard and exposes an accessible interaction contract."
+      }
+    }
+  }
+  environment PackageDevelopment #663e3ff6-f583-4281-89d0-91a9c9c27c4c {
+    desc "The environment used to implement and verify the reusable shortcut recorder package and its adapters."
+  }
+  test CoreBehavior #8fa76082-20fa-47ea-bd6b-7690403c7d27 {
+    desc "Verifies capture cancellation, accessibility, normalization, keycap presentation, conflict detection, and reserved-shortcut warnings."
+    verifies: ::ShortcutRecorder.ShortcutConfiguration.Recording.KeyboardAccessibility, ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine, ::ShortcutRecorder.ShortcutConfiguration.AssignmentSafety.ReservedShortcutWarning, ::ShortcutRecorder.ShortcutConfiguration.Normalization.PortableModifier, ::ShortcutRecorder.ShortcutConfiguration.AssignmentSafety.CollisionDetection, ::ShortcutRecorder.ShortcutConfiguration.Recording.EscapeCancellation, ::ShortcutRecorder.ShortcutConfiguration.Presentation.PrettyKeycaps
+  }
+  test IntegrationBehavior #88682f83-adc7-4b6d-8411-449871a0cb6a {
+    desc "Verifies controlled and uncontrolled integration, headless use, server-rendering safety, and framework-independent core behavior."
+    verifies: ::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.FrameworkAgnosticCore, ::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.ControlledAndUncontrolled, ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine, ::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.ServerRenderingSafe, ::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.HeadlessByDefault
+  }
+}
+}

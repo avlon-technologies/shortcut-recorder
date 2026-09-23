@@ -1,0 +1,30 @@
+{
+  "continuum-ledger": "continuum-ledger/1",
+  "package": "open.shortcutrecorder",
+  "current": 1,
+  "entries": [
+    {
+      "sequence": 1,
+      "label": "close-recorded-gaps",
+      "recorded": "history/0001-close-recorded-gaps",
+      "package": "open.shortcutrecorder",
+      "version": "package-1",
+      "core": "adl/1.4",
+      "changeState": "sha256:187919c0305c3bd77f3bdee5e40577ccead8b1ee620148638574bfd22d3d2c9d",
+      "attestation": "sha256:dff39a05dbd50f14293b9660f7512a58ee4696c21e56421695fa41aa2d81a704",
+      "environment": "PackageDevelopment",
+      "bindingDigests": {
+        "PackageDevelopment": "sha256:434f604e554182bb1b695ca0477d9d690433762662ecf072c55ccf3009800e13"
+      },
+      "acceptance": {
+        "count": 2,
+        "executed": false
+      },
+      "transition": null,
+      "previous": null,
+      "verifiedAgainst": {
+        "commit": "de2a726d46e6f5874d0bd76f8d4dc9eabd3ceaf9"
+      }
+    }
+  ]
+}

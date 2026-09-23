@@ -1,0 +1,19 @@
+{
+  "adl-json": "adl-json/1.0",
+  "vocabulary-claims": {
+    "vocabulary": "open.shortcutrecorder.bindings.package",
+    "version": "package-1",
+    "technologies": {
+      "typescript-library": {
+        "claims": [],
+        "configuration": {
+          "language": "atom",
+          "moduleFormat": "atom",
+          "core": "atom",
+          "reactAdapter": "atom",
+          "styling": "atom"
+        }
+      }
+    }
+  }
+}
