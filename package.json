@@ -1,6 +1,6 @@
 {
   "name": "@avlon/shortcut-recorder",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Capture, normalize, present and validate user-defined keyboard shortcuts. Framework-agnostic core, thin React adapter, headless by default.",
   "keywords": [
     "keyboard",
