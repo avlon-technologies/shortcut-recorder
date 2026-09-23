@@ -1,7 +1,7 @@
 # Gap — the canonical text form of `Shortcut` is not declared
 
 - **date**: 2026-09-23
-- **status**: open — awaiting an architecture decision
+- **status**: **closed** — declared by `continuum/changes/2026-09-23-close-recorded-gaps.adl-change`, applied 2026-09-23
 - **element**: `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Shortcut` (TypeDefinition v1, `alias = text !identity`)
 - **base**: `package open.shortcutrecorder version "package-1" state "sha256:4d2824016cdf4e787171c5dfecc127ef6b10d6613a0d35ab3751974d1ce3e71f"`
 
@@ -47,3 +47,26 @@ choice is applied consistently rather than assumed at each call site.
 The choice is confined to `normalize.ts`; closing the gap with a different
 canonical form would change that file and the tests in
 `tests/normalize.test.ts`, and nothing else.
+
+---
+
+## Disposition — closed 2026-09-23
+
+`business-rule CanonicalShortcutForm` now declares the canonical text: modifier
+tokens in the order Mod, Meta, Ctrl, Alt, Shift, then the key token, separated
+by plus signs, with a single-character key token upper case — and states that
+shortcut identity is equality of that text. `ShortcutEngine` applies it.
+
+The grammar the implementation had already chosen is exactly the one declared,
+so `src/normalize.ts` needed no change: what changed is that it is now applying
+a rule rather than inventing one.
+
+The change applied cleanly: `applicability applies`, `result valid` (0 errors),
+0 design warnings, 0 findings.
+
+| | |
+|---|---|
+| change | `continuum/changes/2026-09-23-close-recorded-gaps.adl-change` |
+| base state | `sha256:4d2824016cdf4e787171c5dfecc127ef6b10d6613a0d35ab3751974d1ce3e71f` |
+| result state | `sha256:187919c0305c3bd77f3bdee5e40577ccead8b1ee620148638574bfd22d3d2c9d` |
+| attestation | `sha256:dff39a05dbd50f14293b9660f7512a58ee4696c21e56421695fa41aa2d81a704` |

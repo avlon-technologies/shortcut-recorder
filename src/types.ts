@@ -40,6 +40,24 @@ export interface NormalizeInput {
   platform: Platform;
 }
 
+/**
+ * Model: `FormatInput v1` — input to `RecorderApi.FormatShortcut`.
+ *
+ * `PrettyKeycaps` asks for platform-appropriate labels, so the same shortcut
+ * reads differently per platform and the platform has to travel with it.
+ */
+export interface FormatInput {
+  shortcut: Shortcut;
+  platform: Platform;
+}
+
+/**
+ * Model: `RecordingState v1` — enumeration `idle | recording`.
+ *
+ * The state `BusinessRule EscapeCancels` cancels out of.
+ */
+export type RecordingState = 'idle' | 'recording';
+
 /** Model: `AssessmentInput v1` — input to `RecorderApi.AssessShortcut`. */
 export interface AssessmentInput {
   shortcut: Shortcut;

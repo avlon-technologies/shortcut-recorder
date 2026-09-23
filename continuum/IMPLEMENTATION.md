@@ -18,8 +18,8 @@
 | | |
 |---|---|
 | package | `open.shortcutrecorder` version `package-1` (core `adl/1.4`) |
-| attestation (canonical model) | `sha256:20c5c49378aaa14d877f27568f11470a4cb645484cf21ce7a860607898c36822` |
-| changeState (the digest a `.adl-change` base pin must name) | `sha256:4d2824016cdf4e787171c5dfecc127ef6b10d6613a0d35ab3751974d1ce3e71f` |
+| attestation (canonical model) | `sha256:dff39a05dbd50f14293b9660f7512a58ee4696c21e56421695fa41aa2d81a704` |
+| changeState (the digest a `.adl-change` base pin must name) | `sha256:187919c0305c3bd77f3bdee5e40577ccead8b1ee620148638574bfd22d3d2c9d` |
 | environment | `::ShortcutRecorder.PackageDevelopment` (`model/package-development.adl-binding.json`) |
 
 A copy of the tool's compile result is `model/compile-proof.json`. Do not edit the semantic files: a byte changed there changes the attestation, every binding goes stale, and the package must be rebuilt.
@@ -122,7 +122,13 @@ Every element below is DECLARED by the model, cited by its root-anchored qualifi
 
 - realizes: `::ShortcutRecorder.ShortcutConfiguration.AssignmentSafety`, `::ShortcutRecorder.ShortcutConfiguration.IntegrationContract`, `::ShortcutRecorder.ShortcutConfiguration.Normalization`, `::ShortcutRecorder.ShortcutConfiguration.Presentation`, `::ShortcutRecorder.ShortcutConfiguration.Recording`
 
-### BusinessRules (4)
+### BusinessRules (6)
+
+#### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.CanonicalShortcutForm` — BusinessRule
+
+> Defines the canonical text of a shortcut, on which shortcut identity rests.
+
+- statement = A shortcut's canonical text is its modifier tokens in the order Mod, Meta, Ctrl, Alt, Shift, followed by its key token, each separated by a plus sign; a single-character key token is upper case. Two shortcuts are the same shortcut exactly when their canonical texts are equal.
 
 #### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ConflictReporting` — BusinessRule
 
@@ -142,6 +148,12 @@ Every element below is DECLARED by the model, cited by its root-anchored qualifi
 
 - statement = Mod resolves to Command on macOS and Control on other supported platforms.
 
+#### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ReservedRecognition` — BusinessRule
+
+> Defines which shortcuts count as browser-reserved, and how the absence of recognition is reported.
+
+- statement = A shortcut is recognized as browser-reserved when a mainstream browser acts on it before the page observes the key press, on the platform being assessed. The engine owns the recognition set. A shortcut the set does not name is reported as unreserved, which is the absence of recognition and not evidence that the shortcut is free.
+
 #### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ReservedWarning` — BusinessRule
 
 > Defines handling for browser-reserved shortcut candidates.
@@ -154,7 +166,7 @@ Every element below is DECLARED by the model, cited by its root-anchored qualifi
 
 > Provides framework-independent shortcut normalization, presentation, assignment assessment, and recorder semantics for adapters.
 
-- applies: `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ConflictReporting`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.EscapeCancels`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ModMapping`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ReservedWarning`
+- applies: `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.CanonicalShortcutForm`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ConflictReporting`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.EscapeCancels`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ModMapping`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ReservedRecognition`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ReservedWarning`
 - realizes: `::ShortcutRecorder.ShortcutConfiguration.AssignmentSafety`, `::ShortcutRecorder.ShortcutConfiguration.IntegrationContract`, `::ShortcutRecorder.ShortcutConfiguration.Normalization`, `::ShortcutRecorder.ShortcutConfiguration.Presentation`, `::ShortcutRecorder.ShortcutConfiguration.Recording`
 - satisfies: `::ShortcutRecorder.ShortcutConfiguration.AssignmentSafety.CollisionDetection`, `::ShortcutRecorder.ShortcutConfiguration.AssignmentSafety.ReservedShortcutWarning`, `::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.ControlledAndUncontrolled`, `::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.FrameworkAgnosticCore`, `::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.HeadlessByDefault`, `::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.ServerRenderingSafe`, `::ShortcutRecorder.ShortcutConfiguration.Normalization.PortableModifier`, `::ShortcutRecorder.ShortcutConfiguration.Presentation.PrettyKeycaps`, `::ShortcutRecorder.ShortcutConfiguration.Recording.EscapeCancellation`, `::ShortcutRecorder.ShortcutConfiguration.Recording.KeyboardAccessibility`
 
@@ -164,28 +176,47 @@ Every element below is DECLARED by the model, cited by its root-anchored qualifi
 
 > The synchronous semantic surface exposed to recorder adapters.
 
-### Operations (3)
+### Operations (6)
 
 #### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine.RecorderApi.AssessShortcut` — Operation
 
 > Assesses a normalized shortcut for assignment conflicts and reserved-shortcut warnings.
 
-- in = AssessmentInput
-- out = Assessment
+- in = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.AssessmentInput
+- out = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Assessment
+
+#### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine.RecorderApi.CancelRecording` — Operation
+
+> Ends an active capture without replacing the committed shortcut.
+
+- out = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.RecordingState
+
+#### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine.RecorderApi.CommitChord` — Operation
+
+> Normalizes a captured chord, ends the capture, and assesses the resulting shortcut for assignment problems.
+
+- in = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.NormalizeInput
+- out = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Assessment
 
 #### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine.RecorderApi.FormatShortcut` — Operation
 
 > Formats a normalized shortcut as readable keycap display text.
 
-- in = Shortcut
-- out = KeycapDisplay
+- in = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.FormatInput
+- out = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.KeycapDisplay
 
 #### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine.RecorderApi.NormalizeShortcut` — Operation
 
 > Normalizes a captured chord into the portable shortcut representation.
 
-- in = NormalizeInput
-- out = Shortcut
+- in = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.NormalizeInput
+- out = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Shortcut
+
+#### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine.RecorderApi.StartRecording` — Operation
+
+> Begins capturing a chord, leaving the committed shortcut untouched.
+
+- out = ::ShortcutRecorder.ShortcutConfiguration.Shortcuts.RecordingState
 
 ### Environment (1)
 
@@ -207,27 +238,32 @@ Every element below is DECLARED by the model, cited by its root-anchored qualifi
 
 - verifies: `::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.ControlledAndUncontrolled`, `::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.FrameworkAgnosticCore`, `::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.HeadlessByDefault`, `::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.ServerRenderingSafe`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine`
 
-### TypeDefinitions (9)
+### TypeDefinitions (11)
 
 #### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Assessment` — TypeDefinition v1
 
 - form = record
-- fields[shortcut=Shortcut; conflict=optional(Conflict); reserved=boolean]
+- fields[conflict=optional(::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Conflict); reserved=boolean; shortcut=::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Shortcut]
 
 #### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.AssessmentInput` — TypeDefinition v1
 
 - form = record
-- fields[shortcut=Shortcut; existing=list(ExistingBinding); platform=Platform]
+- fields[existing=list(::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ExistingBinding); platform=::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Platform; shortcut=::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Shortcut]
 
 #### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Conflict` — TypeDefinition v1
 
 - form = record
-- fields[bindingId=text; shortcut=Shortcut]
+- fields[bindingId=text; shortcut=::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Shortcut]
 
 #### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ExistingBinding` — TypeDefinition v1
 
 - form = record
-- fields[id=text; shortcut=Shortcut]
+- fields[id=text; shortcut=::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Shortcut]
+
+#### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.FormatInput` — TypeDefinition v1
+
+- form = record
+- fields[shortcut=::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Shortcut; platform=::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Platform]
 
 #### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.KeycapDisplay` — TypeDefinition v1
 
@@ -237,7 +273,7 @@ Every element below is DECLARED by the model, cited by its root-anchored qualifi
 #### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.NormalizeInput` — TypeDefinition v1
 
 - form = record
-- fields[chord=RawChord; platform=Platform]
+- fields[chord=::ShortcutRecorder.ShortcutConfiguration.Shortcuts.RawChord; platform=::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Platform]
 
 #### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Platform` — TypeDefinition v1
 
@@ -247,7 +283,12 @@ Every element below is DECLARED by the model, cited by its root-anchored qualifi
 #### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.RawChord` — TypeDefinition v1
 
 - form = record
-- fields[key=text; control=boolean; alt=boolean; shift=boolean; meta=boolean]
+- fields[alt=boolean; control=boolean; key=text; meta=boolean; shift=boolean]
+
+#### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.RecordingState` — TypeDefinition v1
+
+- form = enumeration
+- cases = idle, recording
 
 #### `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.Shortcut` — TypeDefinition v1
 
@@ -259,17 +300,19 @@ Every element below is DECLARED by the model, cited by its root-anchored qualifi
 
 Derived from the model's declarations, in the order a reader needs. Each line names its source.
 
-- **`::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine`** applies `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ConflictReporting`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.EscapeCancels`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ModMapping`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ReservedWarning`.
+- **`::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine`** applies `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.CanonicalShortcutForm`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ConflictReporting`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.EscapeCancels`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ModMapping`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ReservedRecognition`, `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ReservedWarning`.
+- **`::ShortcutRecorder.ShortcutConfiguration.Shortcuts.CanonicalShortcutForm`**: "A shortcut's canonical text is its modifier tokens in the order Mod, Meta, Ctrl, Alt, Shift, followed by its key token, each separated by a plus sign; a single-character key token is upper case. Two shortcuts are the same shortcut exactly when their canonical texts are equal." — applied by whatever declares `applies` to it.
 - **`::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ConflictReporting`**: "A candidate matching an existing normalized shortcut reports the matching binding as a conflict." — applied by whatever declares `applies` to it.
 - **`::ShortcutRecorder.ShortcutConfiguration.Shortcuts.EscapeCancels`**: "Escape cancels the active recording and leaves the committed shortcut unchanged." — applied by whatever declares `applies` to it.
 - **`::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ModMapping`**: "Mod resolves to Command on macOS and Control on other supported platforms." — applied by whatever declares `applies` to it.
+- **`::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ReservedRecognition`**: "A shortcut is recognized as browser-reserved when a mainstream browser acts on it before the page observes the key press, on the platform being assessed. The engine owns the recognition set. A shortcut the set does not name is reported as unreserved, which is the absence of recognition and not evidence that the shortcut is free." — applied by whatever declares `applies` to it.
 - **`::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ReservedWarning`**: "A recognized browser-reserved shortcut produces a warning rather than being treated as an ordinary unreserved assignment." — applied by whatever declares `applies` to it.
 
 **Not declared by the model — and therefore not for the implementation to invent:** anything absent above. Where the implementation needs a behaviour, a message, a store, a consumer or an ordering the model does not declare, follow §6.
 
 ## 4. Technology realization — environment `PackageDevelopment`
 
-Source: `model/package-development.adl-binding.json` (applies to attestation `sha256:20c5c49378aaa14d877f27568f11470a4cb645484cf21ce7a860607898c36822`; environment completeness passed; binding digest `sha256:4b3d3949cbb6ca3ea6e6b5fd94c9bc53cb733fc27551911ee745d5b6742b9758`).
+Source: `model/package-development.adl-binding.json` (applies to attestation `sha256:dff39a05dbd50f14293b9660f7512a58ee4696c21e56421695fa41aa2d81a704`; environment completeness passed; binding digest `sha256:434f604e554182bb1b695ca0477d9d690433762662ecf072c55ccf3009800e13`).
 
 | element | kind | technology | configuration |
 |---|---|---|---|
@@ -306,7 +349,7 @@ If implementing requires a behaviour, message, store, consumer, ordering or rule
 3. Request an architecture change: a `.adl-change` whose `base` pins this package's state —
 
 ```
-base package open.shortcutrecorder version "package-1" state "sha256:4d2824016cdf4e787171c5dfecc127ef6b10d6613a0d35ab3751974d1ce3e71f"
+base package open.shortcutrecorder version "package-1" state "sha256:187919c0305c3bd77f3bdee5e40577ccead8b1ee620148638574bfd22d3d2c9d"
 ```
 
 4. When the change is accepted, the next package is built from the applied state (`node tools/development-package.mjs build … ` with `semantic.change`), and `node tools/development-package.mjs check <package> --change <file>` proves `package.changeState == change.base.state` before any work continues.

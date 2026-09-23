@@ -1,0 +1,67 @@
+change CloseRecordedSemanticGaps core adl/1.4 {
+
+  desc "Closes the four semantic gaps the implementation recorded under continuum/gaps/: the canonical text form on which Shortcut identity rests, the source of truth for browser-reserved recognition, the platform FormatShortcut needs to satisfy PrettyKeycaps, and the recording lifecycle that EscapeCancels presupposes."
+
+  base package open.shortcutrecorder version "package-1" state "sha256:4d2824016cdf4e787171c5dfecc127ef6b10d6613a0d35ab3751974d1ce3e71f"
+
+  // ---- gap 1: the canonical text form of the Shortcut alias -------------------
+
+  add into #8c6d1529-5f2e-4358-9017-dbda5a1a84c9 {
+    business-rule CanonicalShortcutForm #2f615f9d-4f74-45e9-84e4-9a94486da893 {
+      desc "Defines the canonical text of a shortcut, on which shortcut identity rests."
+      statement "A shortcut's canonical text is its modifier tokens in the order Mod, Meta, Ctrl, Alt, Shift, followed by its key token, each separated by a plus sign; a single-character key token is upper case. Two shortcuts are the same shortcut exactly when their canonical texts are equal."
+    }
+  } hint "The Shortcut alias is declared !identity, so identity rests entirely on a textual form the model did not state. Recorded as gaps/2026-09-23-shortcut-text-grammar.md."
+
+  // ---- gap 2: what 'recognized browser-reserved' means ------------------------
+
+  add into #8c6d1529-5f2e-4358-9017-dbda5a1a84c9 {
+    business-rule ReservedRecognition #a27aff2e-a275-4749-bec7-462557fa9623 {
+      desc "Defines which shortcuts count as browser-reserved, and how the absence of recognition is reported."
+      statement "A shortcut is recognized as browser-reserved when a mainstream browser acts on it before the page observes the key press, on the platform being assessed. The engine owns the recognition set. A shortcut the set does not name is reported as unreserved, which is the absence of recognition and not evidence that the shortcut is free."
+    }
+  } hint "ReservedWarning said 'recognized' without declaring by what. Recorded as gaps/2026-09-23-reserved-shortcut-recognition.md."
+
+  // ---- gap 3: FormatShortcut cannot reach the platform it depends on ----------
+
+  add into #8c6d1529-5f2e-4358-9017-dbda5a1a84c9 {
+    record FormatInput v1 #4d719efa-37ee-4040-aaf5-7b1d7ece326a { shortcut: #99b13ad2-d812-42e7-b7b4-39f0272c1316, platform: #6891a68d-a4f7-422b-8014-f84c8dad262d }
+  }
+
+  modify #4d8f1a70-0ab5-465c-b127-0fb1cc679839 attributes.in = #4d719efa-37ee-4040-aaf5-7b1d7ece326a
+    hint "PrettyKeycaps requires platform-appropriate labels, so the same Shortcut must render differently per platform; NormalizeShortcut and AssessShortcut already take platform as input. Recorded as gaps/2026-09-23-format-shortcut-platform.md."
+
+  // ---- gap 4: the recording lifecycle EscapeCancels presupposes ---------------
+
+  add into #8c6d1529-5f2e-4358-9017-dbda5a1a84c9 {
+    enum RecordingState v1 #07cf4ebc-0018-4227-8de1-b662f93f4619 = idle | recording
+  }
+
+  add into #ff9fb049-86ef-4f7e-aa23-8f228838c736 {
+    operation StartRecording #68142f15-8d68-4d75-9990-ee980befdcb4 {
+      desc "Begins capturing a chord, leaving the committed shortcut untouched."
+      out = #07cf4ebc-0018-4227-8de1-b662f93f4619
+    }
+  }
+
+  add into #ff9fb049-86ef-4f7e-aa23-8f228838c736 {
+    operation CancelRecording #90ca5175-d7cb-4109-8685-68798a07612d {
+      desc "Ends an active capture without replacing the committed shortcut."
+      out = #07cf4ebc-0018-4227-8de1-b662f93f4619
+    }
+  }
+
+  add into #ff9fb049-86ef-4f7e-aa23-8f228838c736 {
+    operation CommitChord #aeca1ade-00fc-4b4e-9141-0abb6895362c {
+      desc "Normalizes a captured chord, ends the capture, and assesses the resulting shortcut for assignment problems."
+      in = #6e555cdc-1eef-497d-b76d-a54f7acb9eb4
+      out = #3053a974-d7e5-4fa7-b06f-6be30b1bf107
+    }
+  } hint "EscapeCancels speaks of 'the active recording' and 'the committed shortcut', but RecorderApi declared only pure functions, so there was no state for cancellation to act on. Recorded as gaps/2026-09-23-recorder-lifecycle-surface.md."
+
+  // ---- the engine applies the two new rules -----------------------------------
+
+  link #58320b7e-f3f8-4f64-9417-e20e8dd1a318 applies #2f615f9d-4f74-45e9-84e4-9a94486da893
+
+  link #58320b7e-f3f8-4f64-9417-e20e8dd1a318 applies #a27aff2e-a275-4749-bec7-462557fa9623
+}

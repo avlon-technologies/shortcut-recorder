@@ -1,7 +1,7 @@
 import type { Modifier } from './keys.js';
 import { parseShortcut } from './normalize.js';
 import { detectPlatform } from './platform.js';
-import type { KeycapDisplay, Platform, Shortcut } from './types.js';
+import type { FormatInput, KeycapDisplay, Platform, Shortcut } from './types.js';
 
 /** Keycap label per modifier token, per platform. */
 const MODIFIER_LABELS: Record<Platform, Record<Modifier, string>> = {
@@ -61,10 +61,10 @@ export function ariaKeyShortcuts(shortcut: Shortcut, platform: Platform = detect
  * such as Command, Shift, and P". One label per cap, so a UI can render each in
  * its own element; {@link formatShortcut} is the same information joined.
  *
- * @param platform defaults to {@link detectPlatform}. The model declares
- * `FormatShortcut` with `in = Shortcut`, so platform is ambient environment
- * here rather than part of the shortcut's identity — see
- * `gaps/2026-09-23-format-shortcut-platform.md`.
+ * `keycapLabels` is a presentation convenience, not a declared operation, so
+ * it takes the platform as a second argument and defaults it to
+ * {@link detectPlatform}. The declared operation is {@link formatShortcut},
+ * which requires the platform because `FormatInput` declares it.
  */
 export function keycapLabels(shortcut: Shortcut, platform: Platform = detectPlatform()): string[] {
   const { modifiers, key } = parseShortcut(shortcut);
@@ -73,15 +73,14 @@ export function keycapLabels(shortcut: Shortcut, platform: Platform = detectPlat
 }
 
 /**
- * Implements `RecorderApi.FormatShortcut` — in `Shortcut`, out `KeycapDisplay`.
+ * Implements `RecorderApi.FormatShortcut` — in `FormatInput`, out `KeycapDisplay`.
  *
- * @param platform defaults to {@link detectPlatform}; see {@link keycapLabels}.
+ * The platform is required, not detected: `FormatInput` declares it, and a
+ * caller that wants the ambient one passes `detectPlatform()` and can see that
+ * it did.
  */
-export function formatShortcut(
-  shortcut: Shortcut,
-  platform: Platform = detectPlatform(),
-): KeycapDisplay {
-  return { text: keycapLabels(shortcut, platform).join(SEPARATOR) };
+export function formatShortcut(input: FormatInput): KeycapDisplay {
+  return { text: keycapLabels(input.shortcut, input.platform).join(SEPARATOR) };
 }
 
 function keyLabel(key: string, platform: Platform): string {

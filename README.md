@@ -40,8 +40,8 @@ normalizeShortcut({
 // → 'Mod+Shift+P'   (Control+Shift+P on Windows normalizes to the same value)
 
 // …which reads differently on each platform…
-formatShortcut('Mod+Shift+P', 'macos'); // → { text: 'Command + Shift + P' }
-formatShortcut('Mod+Shift+P', 'other'); // → { text: 'Ctrl + Shift + P' }
+formatShortcut({ shortcut: 'Mod+Shift+P', platform: 'macos' }); // → { text: 'Command + Shift + P' }
+formatShortcut({ shortcut: 'Mod+Shift+P', platform: 'other' }); // → { text: 'Ctrl + Shift + P' }
 
 // …and can be checked before you assign it.
 assessShortcut({
@@ -87,8 +87,9 @@ The keyboard contract:
 | recording | bare Tab | ignored, so focus can leave |
 | recording | any other key | commit that chord |
 
-`getSnapshot()` returns `{ recording, value, assessment, pressed, keycaps,
-display, status, platform }`. `getRecorderAttributes()` and
+`getSnapshot()` returns `{ recordingState, recording, value, assessment,
+pressed, keycaps, display, status, platform }`, where `recordingState` is the
+declared `'idle' | 'recording'` and `recording` is the boolean convenience. `getRecorderAttributes()` and
 `getStatusAttributes()` return the accessibility attributes for the control and
 its live region.
 
@@ -135,21 +136,35 @@ exactly what you return and adds no wrapper element.
 
 ## API
 
+The six operations the architecture declares:
+
+| export | operation | what it is |
+|---|---|---|
+| `normalizeShortcut(input)` | `NormalizeShortcut` | chord + platform → portable `Shortcut` |
+| `formatShortcut(input)` | `FormatShortcut` | shortcut + platform → `{ text }` |
+| `assessShortcut(input)` | `AssessShortcut` | → `{ shortcut, conflict?, reserved }` |
+| `recorder.start()` | `StartRecording` | → `RecordingState` |
+| `recorder.cancel()` | `CancelRecording` | → `RecordingState` |
+| `recorder.commitChord(input)` | `CommitChord` | → `Assessment` |
+
+The first three are pure functions and stand alone; the last three are the
+recording lifecycle, so they live on a recorder instance.
+
+Everything else is convenience over those:
+
 | export | what it is |
 |---|---|
-| `normalizeShortcut(input)` | chord + platform → portable `Shortcut` |
-| `formatShortcut(shortcut, platform?)` | → `{ text }` keycap display |
-| `keycapLabels(shortcut, platform?)` | → one label per cap |
-| `assessShortcut(input)` | → `{ shortcut, conflict?, reserved }` |
-| `createShortcutRecorder(options)` | the recording lifecycle as a store |
+| `createShortcutRecorder(options)` | the recording lifecycle as a subscribable store |
+| `keycapLabels(shortcut, platform?)` | one label per cap, rather than joined |
 | `canonicalizeShortcut` / `parseShortcut` / `shortcutsEqual` | shortcut identity |
 | `isReservedShortcut` / `reservedShortcuts` | the recognized browser-reserved set |
 | `ariaKeyShortcuts(shortcut, platform?)` | the `aria-keyshortcuts` spelling |
 | `detectPlatform()` / `hasDom()` | ambient environment, safely |
 | `useShortcutRecorder` / `ShortcutRecorder` | from `@avlon/shortcut-recorder/react` |
 
-Where `platform` is optional it defaults to `detectPlatform()`, which answers
-`'other'` when there is no `navigator` to ask.
+A declared operation takes its platform as input, because the architecture says
+so. Where a convenience makes `platform` optional it defaults to
+`detectPlatform()`, which answers `'other'` when there is no `navigator` to ask.
 
 ## Architecture
 
@@ -157,9 +172,9 @@ This package is implemented against a Continuum development package in
 [`continuum/`](continuum/). The semantic model
 (`continuum/model/shortcut-recorder.adl`) is the authority for what the code
 means; `continuum/IMPLEMENTATION.md` is the contract, and
-`continuum/acceptance/` holds the executable scenarios that prove it. Decisions
-the model does not declare are recorded in `continuum/gaps/` rather than made
-silently.
+`continuum/acceptance/` holds the executable scenarios that prove it. Decisions the model does not declare are recorded in `continuum/gaps/` rather
+than made silently, and closed by an architecture change under
+`continuum/changes/` rather than by drifting the code away from the model.
 
 ```sh
 npm run verify      # typecheck, unit tests, then the acceptance scenarios

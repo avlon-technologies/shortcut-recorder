@@ -23,12 +23,18 @@ describe('keycaps — Requirement PrettyKeycaps', () => {
   });
 
   it('joins the caps into the KeycapDisplay record the model declares', () => {
-    expect(formatShortcut('Mod+Shift+P', 'macos')).toEqual({ text: 'Command + Shift + P' });
-    expect(formatShortcut('Mod+Shift+P', 'other')).toEqual({ text: 'Ctrl + Shift + P' });
+    expect(formatShortcut({ shortcut: 'Mod+Shift+P', platform: 'macos' })).toEqual({
+      text: 'Command + Shift + P',
+    });
+    expect(formatShortcut({ shortcut: 'Mod+Shift+P', platform: 'other' })).toEqual({
+      text: 'Ctrl + Shift + P',
+    });
   });
 
   it('accepts any spelling of the shortcut', () => {
-    expect(formatShortcut('mod+shift+p', 'macos').text).toBe('Command + Shift + P');
+    expect(formatShortcut({ shortcut: 'mod+shift+p', platform: 'macos' }).text).toBe(
+      'Command + Shift + P',
+    );
   });
 });
 

@@ -5,16 +5,21 @@
  * Importing this module touches no browser global and pulls in no UI framework
  * (`FrameworkAgnosticCore`, `ServerRenderingSafe`, `HeadlessByDefault`).
  *
- * `RecorderApi` maps onto three functions:
+ * `RecorderApi` maps onto these:
  *
  * | operation | function |
  * |---|---|
  * | `NormalizeShortcut` | {@link normalizeShortcut} |
  * | `FormatShortcut` | {@link formatShortcut} |
  * | `AssessShortcut` | {@link assessShortcut} |
+ * | `StartRecording` | `recorder.start()` |
+ * | `CancelRecording` | `recorder.cancel()` |
+ * | `CommitChord` | `recorder.commitChord(input)` |
  *
- * {@link createShortcutRecorder} adds the recorder semantics the engine
- * provides to adapters around those operations.
+ * The first three are pure functions over a chord or a shortcut and stand on
+ * their own. The last three are the recording lifecycle, so they live on a
+ * recorder instance from {@link createShortcutRecorder} — the state they move
+ * between is the model's `RecordingState`.
  */
 
 export type {
@@ -22,10 +27,12 @@ export type {
   AssessmentInput,
   Conflict,
   ExistingBinding,
+  FormatInput,
   KeycapDisplay,
   NormalizeInput,
   Platform,
   RawChord,
+  RecordingState,
   Shortcut,
 } from './types.js';
 

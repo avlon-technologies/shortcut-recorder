@@ -104,6 +104,67 @@ describe('recording — Requirement KeyboardAccessibility', () => {
   });
 });
 
+describe('the declared lifecycle operations — RecorderApi', () => {
+  it('StartRecording and CancelRecording answer with the RecordingState', () => {
+    const recorder = createShortcutRecorder({ platform: 'macos', defaultValue: 'Mod+K' });
+
+    expect(recorder.getSnapshot().recordingState).toBe('idle');
+    expect(recorder.start()).toBe('recording');
+    expect(recorder.getSnapshot().recordingState).toBe('recording');
+    expect(recorder.cancel()).toBe('idle');
+    expect(recorder.getSnapshot().recordingState).toBe('idle');
+  });
+
+  it('answers with the state the recorder is in, not the transition it made', () => {
+    const recorder = createShortcutRecorder({ platform: 'macos' });
+    expect(recorder.start()).toBe('recording');
+    expect(recorder.start()).toBe('recording'); // already recording
+    expect(recorder.cancel()).toBe('idle');
+    expect(recorder.cancel()).toBe('idle'); // already idle
+  });
+
+  it('CommitChord normalizes, ends the capture, and returns the Assessment', () => {
+    const recorder = createShortcutRecorder({
+      platform: 'macos',
+      existing: [{ id: 'search', shortcut: 'Mod+K' }],
+    });
+
+    recorder.start();
+    const assessment = recorder.commitChord({
+      chord: { key: 'k', control: false, alt: false, shift: false, meta: true },
+      platform: 'macos',
+    });
+
+    expect(assessment).toEqual({
+      shortcut: 'Mod+K',
+      reserved: false,
+      conflict: { bindingId: 'search', shortcut: 'Mod+K' },
+    });
+    expect(recorder.getSnapshot()).toMatchObject({ recordingState: 'idle', value: 'Mod+K' });
+  });
+
+  it('commits a chord that was never started, since the model does not forbid it', () => {
+    const recorder = createShortcutRecorder({ platform: 'other' });
+    const assessment = recorder.commitChord({
+      chord: { key: 'j', control: true, alt: false, shift: false, meta: false },
+      platform: 'other',
+    });
+    expect(assessment.shortcut).toBe('Mod+J');
+  });
+
+  it('keeps recordingState and the recording convenience in step', () => {
+    const recorder = createShortcutRecorder({ platform: 'macos' });
+    for (const _ of [0, 1]) {
+      const idle = recorder.getSnapshot();
+      expect(idle.recording).toBe(idle.recordingState === 'recording');
+      recorder.start();
+      const busy = recorder.getSnapshot();
+      expect(busy.recording).toBe(busy.recordingState === 'recording');
+      recorder.cancel();
+    }
+  });
+});
+
 describe('capture — Capability Recording', () => {
   it('commits the chord and reports its assessment', () => {
     const onChange = vi.fn<(s: Shortcut | null, a: Assessment | null) => void>();

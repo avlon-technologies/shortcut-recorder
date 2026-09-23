@@ -1,7 +1,7 @@
 # Gap — the recording lifecycle has behaviour but no declared surface
 
 - **date**: 2026-09-23
-- **status**: open — awaiting an architecture decision
+- **status**: **closed** — declared by `continuum/changes/2026-09-23-close-recorded-gaps.adl-change`, applied 2026-09-23
 - **element**: `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine.RecorderApi` (API), `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.EscapeCancels` (BusinessRule), `::ShortcutRecorder.ShortcutConfiguration.Recording` (Capability)
 - **base**: `package open.shortcutrecorder version "package-1" state "sha256:4d2824016cdf4e787171c5dfecc127ef6b10d6613a0d35ab3751974d1ce3e71f"`
 
@@ -66,3 +66,31 @@ The keyboard contract the store implements is documented on
 uncontrolled ownership of the committed shortcut follows the host platform's
 own convention (React's) rather than inventing one. Both are implementation
 policy, recorded here, not architecture.
+
+---
+
+## Disposition — closed 2026-09-23
+
+`enum RecordingState v1 = idle | recording` was added, and `RecorderApi` gained
+three operations: `StartRecording` and `CancelRecording` (out `RecordingState`)
+and `CommitChord` (in `NormalizeInput`, out `Assessment`). `EscapeCancels` now
+has a declared state to cancel out of.
+
+`recorder.start()` and `recorder.cancel()` return the `RecordingState`, and
+`recorder.commitChord(input)` is the declared commit that `handleKeyDown` calls.
+The snapshot exposes `recordingState` as the declared vocabulary, with
+`recording` retained as the boolean convenience derived from it.
+
+The keyboard contract (which key starts, cancels or commits) remains
+implementation policy: the model declares the states and the operations, not the
+key bindings that drive them.
+
+The change applied cleanly: `applicability applies`, `result valid` (0 errors),
+0 design warnings, 0 findings.
+
+| | |
+|---|---|
+| change | `continuum/changes/2026-09-23-close-recorded-gaps.adl-change` |
+| base state | `sha256:4d2824016cdf4e787171c5dfecc127ef6b10d6613a0d35ab3751974d1ce3e71f` |
+| result state | `sha256:187919c0305c3bd77f3bdee5e40577ccead8b1ee620148638574bfd22d3d2c9d` |
+| attestation | `sha256:dff39a05dbd50f14293b9660f7512a58ee4696c21e56421695fa41aa2d81a704` |

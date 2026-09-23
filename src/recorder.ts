@@ -3,7 +3,15 @@ import { ariaKeyShortcuts, formatShortcut, keycapLabels, modifierLabel } from '.
 import { isModifierKey, keyTokenFromCode, sortModifiers, type Modifier } from './keys.js';
 import { canonicalizeShortcut, normalizeShortcut } from './normalize.js';
 import { detectPlatform } from './platform.js';
-import type { Assessment, ExistingBinding, Platform, RawChord, Shortcut } from './types.js';
+import type {
+  Assessment,
+  ExistingBinding,
+  NormalizeInput,
+  Platform,
+  RawChord,
+  RecordingState,
+  Shortcut,
+} from './types.js';
 
 /**
  * The part of a `KeyboardEvent` the recorder reads.
@@ -54,7 +62,9 @@ export interface RecorderOptions {
 
 /** An immutable view of the recorder, safe to render from. */
 export interface RecorderSnapshot {
-  /** Whether the recorder is listening for a chord. */
+  /** The declared `RecordingState` the recorder is in. */
+  readonly recordingState: RecordingState;
+  /** `recordingState === 'recording'`, for rendering and `aria-pressed`. */
   readonly recording: boolean;
   /** The committed shortcut, or `null` when nothing is assigned. */
   readonly value: Shortcut | null;
@@ -99,13 +109,23 @@ export interface ShortcutRecorder {
   getSnapshot(): RecorderSnapshot;
   /** Subscribe to changes; returns the unsubscribe function. */
   subscribe(listener: () => void): () => void;
-  /** Begin listening for a chord. */
-  start(): void;
   /**
-   * End recording without committing. Applies `BusinessRule EscapeCancels`:
-   * the committed shortcut is left exactly as it was.
+   * Implements `RecorderApi.StartRecording` — out `RecordingState`. Begins
+   * capturing a chord, leaving the committed shortcut untouched.
    */
-  cancel(): void;
+  start(): RecordingState;
+  /**
+   * Implements `RecorderApi.CancelRecording` — out `RecordingState`. Ends an
+   * active capture without replacing the committed shortcut, which is
+   * `BusinessRule EscapeCancels`.
+   */
+  cancel(): RecordingState;
+  /**
+   * Implements `RecorderApi.CommitChord` — in `NormalizeInput`, out
+   * `Assessment`. Normalizes the chord, ends the capture, and assesses the
+   * result. Reported through `onChange` like any other commit.
+   */
+  commitChord(input: NormalizeInput): Assessment;
   /**
    * Clear the committed shortcut. Reported through `onChange` as `null, null`,
    * so a controlled caller learns about it the same way it learns about a
@@ -201,37 +221,43 @@ export function createShortcutRecorder(options: RecorderOptions = {}): ShortcutR
     return snapshot;
   };
 
-  const start = (): void => {
-    if (recording) return;
+  const start = (): RecordingState => {
+    if (recording) return 'recording';
     recording = true;
     pressed = [];
     invalidate();
     opts.onRecordingChange?.(true);
+    return 'recording';
   };
 
-  const cancel = (): void => {
-    if (!recording) return;
+  const cancel = (): RecordingState => {
+    if (!recording) return 'idle';
     recording = false;
     pressed = [];
     invalidate();
     opts.onRecordingChange?.(false);
     opts.onCancel?.();
+    return 'idle';
   };
 
   /** Settle on a value and report it, ending recording if it was in progress. */
-  const settle = (shortcut: Shortcut | null): void => {
+  const settle = (shortcut: Shortcut | null): Assessment | null => {
     const wasRecording = recording;
     if (!controlled) internalValue = shortcut;
     recording = false;
     pressed = [];
     invalidate();
 
+    const assessment =
+      shortcut === null ? null : assessShortcut({ shortcut, existing, platform });
+
     if (wasRecording) opts.onRecordingChange?.(false);
-    opts.onChange?.(
-      shortcut,
-      shortcut === null ? null : assessShortcut({ shortcut, existing, platform }),
-    );
+    opts.onChange?.(shortcut, assessment);
+    return assessment;
   };
+
+  const commitChord = (input: NormalizeInput): Assessment =>
+    settle(normalizeShortcut(input)) as Assessment;
 
   const syncPressed = (event: KeyboardEventLike): void => {
     const next = sortModifiers(modifiersOf(event, platform));
@@ -273,7 +299,7 @@ export function createShortcutRecorder(options: RecorderOptions = {}): ShortcutR
       return true;
     }
 
-    settle(normalizeShortcut({ chord: rawChordFromEvent(event), platform }));
+    commitChord({ chord: rawChordFromEvent(event), platform });
     return true;
   };
 
@@ -296,6 +322,7 @@ export function createShortcutRecorder(options: RecorderOptions = {}): ShortcutR
     getSnapshot,
     start,
     cancel,
+    commitChord,
     handleKeyDown,
     getRecorderAttributes,
 
@@ -364,9 +391,12 @@ function buildSnapshot(input: {
       : keycapLabels(value, platform);
 
   const display =
-    recording || value === null ? keycaps.join(SEPARATOR) : formatShortcut(value, platform).text;
+    recording || value === null
+      ? keycaps.join(SEPARATOR)
+      : formatShortcut({ shortcut: value, platform }).text;
 
   return Object.freeze({
+    recordingState: recording ? ('recording' as const) : ('idle' as const),
     recording,
     value,
     assessment,

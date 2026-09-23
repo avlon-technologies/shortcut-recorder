@@ -11,8 +11,8 @@
     ]
   },
   "ok": true,
-  "attestation": "sha256:20c5c49378aaa14d877f27568f11470a4cb645484cf21ce7a860607898c36822",
-  "changeState": "sha256:4d2824016cdf4e787171c5dfecc127ef6b10d6613a0d35ab3751974d1ce3e71f",
+  "attestation": "sha256:dff39a05dbd50f14293b9660f7512a58ee4696c21e56421695fa41aa2d81a704",
+  "changeState": "sha256:187919c0305c3bd77f3bdee5e40577ccead8b1ee620148638574bfd22d3d2c9d",
   "ledger": {
     "passed": 73,
     "failed": 0,
@@ -29,7 +29,7 @@
         "id": "663e3ff6-f583-4281-89d0-91a9c9c27c4c",
         "document": "model/package-development.adl-binding.json",
         "completeness": "passed",
-        "bindingDigest": "sha256:4b3d3949cbb6ca3ea6e6b5fd94c9bc53cb733fc27551911ee745d5b6742b9758",
+        "bindingDigest": "sha256:434f604e554182bb1b695ca0477d9d690433762662ecf072c55ccf3009800e13",
         "notEvaluated": []
       }
     ],

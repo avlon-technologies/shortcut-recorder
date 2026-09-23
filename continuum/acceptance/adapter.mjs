@@ -91,7 +91,11 @@ export function createAdapter() {
         // Recording must be reachable from the keyboard alone.
         const started = ctx.state.recorder.handleKeyDown(plainKey('Enter'));
         ctx.assert.equal(started, true, 'Enter starts recording');
-        ctx.assert.equal(ctx.state.recorder.getSnapshot().recording, true);
+        ctx.assert.equal(
+          ctx.state.recorder.getSnapshot().recordingState,
+          'recording',
+          'StartRecording moved the recorder into the recording state',
+        );
 
         const attributes = ctx.state.recorder.getRecorderAttributes();
         ctx.assert.equal(attributes.role, 'button', 'the control has a role');
@@ -110,7 +114,11 @@ export function createAdapter() {
 
         const handled = ctx.state.recorder.handleKeyDown(chordEvent(args));
         ctx.assert.equal(handled, true, 'the recorder consumed the chord');
-        ctx.assert.equal(ctx.state.recorder.getSnapshot().recording, false, 'the chord ended recording');
+        ctx.assert.equal(
+          ctx.state.recorder.getSnapshot().recordingState,
+          'idle',
+          'CommitChord ended the capture',
+        );
       },
 
       'recorder.normalized-value-is': (ctx, args) => {
@@ -129,7 +137,7 @@ export function createAdapter() {
       'recorder.keycaps-are-readable': (ctx) => {
         const { value, platform } = ctx.state.recorder.getSnapshot();
         const labels = core.keycapLabels(value, platform);
-        const display = core.formatShortcut(value, platform);
+        const display = core.formatShortcut({ shortcut: value, platform });
 
         ctx.assert.deepEqual(labels, ['Command', 'Shift', 'P'], 'one readable label per keycap');
         ctx.assert.equal(display.text, 'Command + Shift + P', 'KeycapDisplay.text');
@@ -139,7 +147,9 @@ export function createAdapter() {
 
         // The same shortcut reads differently where the keyboard differs.
         ctx.assert.deepEqual(core.keycapLabels(value, 'other'), ['Ctrl', 'Shift', 'P']);
-        ctx.log(`macOS: ${display.text} / other: ${core.formatShortcut(value, 'other').text}`);
+        ctx.log(
+          `macOS: ${display.text} / other: ${core.formatShortcut({ shortcut: value, platform: 'other' }).text}`,
+        );
       },
 
       'recorder.conflict-is-reported': (ctx, args) => {
@@ -177,15 +187,24 @@ export function createAdapter() {
         const commitCountBefore = ctx.state.committed.length;
 
         recorder.handleKeyDown(plainKey('Enter'));
-        ctx.assert.equal(recorder.getSnapshot().recording, true, 'recording again');
+        ctx.assert.equal(recorder.getSnapshot().recordingState, 'recording', 'recording again');
         recorder.handleKeyDown({ ...plainKey('Meta'), metaKey: true });
 
         const handled = recorder.handleKeyDown(plainKey('Escape'));
 
         ctx.assert.equal(handled, true, 'Escape was consumed');
-        ctx.assert.equal(recorder.getSnapshot().recording, false, 'recording stopped');
+        ctx.assert.equal(
+          recorder.getSnapshot().recordingState,
+          'idle',
+          'CancelRecording returned the recorder to idle',
+        );
         ctx.assert.equal(recorder.getSnapshot().value, committedBefore, 'the committed value is untouched');
         ctx.assert.equal(ctx.state.committed.length, commitCountBefore, 'nothing was committed');
+
+        // The same rule through the declared operations rather than the keyboard.
+        ctx.assert.equal(recorder.start(), 'recording', 'StartRecording');
+        ctx.assert.equal(recorder.cancel(), 'idle', 'CancelRecording');
+        ctx.assert.equal(recorder.getSnapshot().value, committedBefore, 'still untouched');
       },
 
       // ---- integration-contract ---------------------------------------------------

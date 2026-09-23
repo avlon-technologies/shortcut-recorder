@@ -1,7 +1,7 @@
 # Gap — which shortcuts are "recognized browser-reserved" is not declared
 
 - **date**: 2026-09-23
-- **status**: open — awaiting an architecture decision
+- **status**: **closed** — declared by `continuum/changes/2026-09-23-close-recorded-gaps.adl-change`, applied 2026-09-23
 - **element**: `::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ReservedWarning` (BusinessRule), `::ShortcutRecorder.ShortcutConfiguration.AssignmentSafety.ReservedShortcutWarning` (Requirement)
 - **base**: `package open.shortcutrecorder version "package-1" state "sha256:4d2824016cdf4e787171c5dfecc127ef6b10d6613a0d35ab3751974d1ce3e71f"`
 
@@ -52,3 +52,28 @@ that this table does not list it.
 
 The set is data in one module; closing the gap either way replaces that module
 without touching normalization, presentation or the recorder.
+
+---
+
+## Disposition — closed 2026-09-23
+
+`business-rule ReservedRecognition` now declares the source of truth: a shortcut
+is recognized as browser-reserved when a mainstream browser acts on it before
+the page observes the key press, on the platform being assessed; the engine owns
+the set; and a shortcut the set does not name is reported as unreserved, which
+is the absence of recognition rather than evidence that the shortcut is free.
+`ShortcutEngine` applies it.
+
+Option (1) was taken — the narrower one. `AssessmentInput` is unchanged, so no
+caller of `AssessShortcut` is affected. `src/reserved.ts` needed no change; the
+one-directional reading it already documented is now the declared one.
+
+The change applied cleanly: `applicability applies`, `result valid` (0 errors),
+0 design warnings, 0 findings.
+
+| | |
+|---|---|
+| change | `continuum/changes/2026-09-23-close-recorded-gaps.adl-change` |
+| base state | `sha256:4d2824016cdf4e787171c5dfecc127ef6b10d6613a0d35ab3751974d1ce3e71f` |
+| result state | `sha256:187919c0305c3bd77f3bdee5e40577ccead8b1ee620148638574bfd22d3d2c9d` |
+| attestation | `sha256:dff39a05dbd50f14293b9660f7512a58ee4696c21e56421695fa41aa2d81a704` |

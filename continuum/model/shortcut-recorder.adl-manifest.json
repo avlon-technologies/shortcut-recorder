@@ -6,6 +6,8 @@
     "core": "adl/1.4",
     "imports": [],
     "extensions": [],
-    "documents": ["shortcut-recorder.adl"]
+    "documents": [
+      "shortcut-recorder.adl"
+    ]
   }
 }

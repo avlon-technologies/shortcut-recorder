@@ -66,7 +66,7 @@ describe('Requirement ServerRenderingSafe', () => {
       platform: 'macos',
     });
     expect(shortcut).toBe('Mod+Shift+P');
-    expect(core.formatShortcut(shortcut, 'macos').text).toBe('Command + Shift + P');
+    expect(core.formatShortcut({ shortcut, platform: 'macos' }).text).toBe('Command + Shift + P');
   });
 });
 

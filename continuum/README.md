@@ -31,8 +31,8 @@ The implementation realizes all of the above — and is not in this package.
 | | |
 |---|---|
 | semantic package | `open.shortcutrecorder` `package-1` (`adl/1.4`) |
-| attestation | `sha256:20c5c49378aaa14d877f27568f11470a4cb645484cf21ce7a860607898c36822` |
-| changeState | `sha256:4d2824016cdf4e787171c5dfecc127ef6b10d6613a0d35ab3751974d1ce3e71f` |
+| attestation | `sha256:dff39a05dbd50f14293b9660f7512a58ee4696c21e56421695fa41aa2d81a704` |
+| changeState | `sha256:187919c0305c3bd77f3bdee5e40577ccead8b1ee620148638574bfd22d3d2c9d` |
 | environment | `PackageDevelopment` |
 | scenarios | 2, resolved against the model; execute them with `package run` (adapter `acceptance/adapter.mjs`) |
 | compiler warnings | 0 |

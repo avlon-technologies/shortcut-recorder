@@ -5,7 +5,7 @@
     "base": {
       "package": "open.shortcutrecorder",
       "version": "package-1",
-      "canonicalModel": "sha256:20c5c49378aaa14d877f27568f11470a4cb645484cf21ce7a860607898c36822"
+      "canonicalModel": "sha256:dff39a05dbd50f14293b9660f7512a58ee4696c21e56421695fa41aa2d81a704"
     },
     "vocabularies": [
       {
