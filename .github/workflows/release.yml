@@ -1,0 +1,74 @@
+name: Release to npm
+
+# Publishing happens here, not on anyone's laptop.
+#
+#   npm version patch && git push --follow-tags
+#
+# is the whole release: the tag triggers this workflow, which verifies the
+# package and publishes it. An npm automation token is exempt from the 2FA
+# one-time password that blocks interactive `npm publish`, so nothing has to be
+# approved in a browser.
+#
+# ONE-TIME SETUP
+#   1. npmjs.com → Access Tokens → Generate → Granular Access Token
+#      - Packages and scopes: Read and write on @avlon
+#      - Expiration: set a real one and diarise the renewal
+#   2. This repo → Settings → Secrets and variables → Actions → New secret
+#      - Name: NPM_TOKEN
+#
+# The token never touches a developer machine, and `--provenance` attaches a
+# verifiable record of the commit and workflow that built the tarball.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to publish (e.g. v0.1.3)'
+        required: true
+
+permissions:
+  contents: read
+  id-token: write # required for --provenance
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          # Writes the .npmrc that makes npm publish use NODE_AUTH_TOKEN.
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+
+      # A tag that disagrees with package.json would publish the wrong version
+      # under the right name, which is unfixable once it is on the registry.
+      - name: Tag must match package.json
+        run: |
+          tag="${{ inputs.tag || github.ref_name }}"
+          pkg="v$(node -p "require('./package.json').version")"
+          if [ "$tag" != "$pkg" ]; then
+            echo "::error::tag $tag does not match package.json $pkg"
+            exit 1
+          fi
+          echo "releasing $pkg"
+
+      # prepublishOnly runs this again during publish; keeping it explicit
+      # means a failure is attributed to the gate rather than to the upload.
+      - run: npm run verify
+
+      - run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

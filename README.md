@@ -189,6 +189,21 @@ npm run acceptance  # build, then the acceptance scenarios against dist/
 npm run demo        # the demo page, watched and served on :5173
 ```
 
+## Releasing
+
+Publishing runs in CI, not on a laptop:
+
+```sh
+npm version patch      # or minor / major — bumps package.json and tags
+git push --follow-tags # the tag triggers .github/workflows/release.yml
+```
+
+The workflow checks the tag against `package.json`, runs the full gate, and
+publishes with `--provenance`. It needs an `NPM_TOKEN` repository secret — a
+granular npm access token with read/write on the `@avlon` scope. An automation
+token is exempt from the 2FA one-time password, which is what makes an
+unattended publish possible at all.
+
 ## Contributing
 
 `npm run verify` is the gate. The demo under [`demo/`](demo/) has its own
