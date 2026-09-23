@@ -36,6 +36,11 @@ function capsFor(label: string): string[] {
   return [...recorderFor(label).querySelectorAll('kbd')].map((k) => k.textContent ?? '');
 }
 
+/** What the pretend application currently reports as fired. */
+function firedText(): string {
+  return document.querySelector('.fired')?.textContent ?? '';
+}
+
 /** Record a chord into a command's recorder the way a keyboard user would. */
 function record(label: string, chord: Record<string, unknown>): void {
   const control = recorderFor(label);
@@ -64,11 +69,11 @@ describe('the demo page renders', () => {
     expect(within(rowFor('Quick search')).getByText(/stored as Mod\+K/)).toBeTruthy();
   });
 
-  it('warns about the reserved shortcut it ships with', () => {
-    render(<App />);
-    expect(within(rowFor('New document')).getByText(/browser keeps this shortcut/i)).toBeTruthy();
-    // …and does not cry wolf on the others.
-    expect(within(rowFor('Save')).queryByText(/browser keeps this shortcut/i)).toBeNull();
+  it('ships no binding the browser would swallow', () => {
+    // A default the browser eats could never fire, and a demo must never look
+    // broken. Reserved shortcuts are discoverable by recording one instead.
+    const view = render(<App />);
+    expect(within(bindings(view)).queryByText(/browser keeps this shortcut/i)).toBeNull();
   });
 
   it('starts with no conflicts', () => {
@@ -148,6 +153,77 @@ describe('recording in the demo', () => {
     // Mod+K is free now, so taking it raises nothing.
     record('Save', { key: 'K', code: 'KeyK', ctrlKey: true });
     expect(within(bindings(view)).queryByText(/Already assigned to/)).toBeNull();
+  });
+});
+
+describe('the shortcuts actually fire', () => {
+  it('runs the matching command on a bare keypress, with nothing focused', () => {
+    render(<App />);
+    expect(screen.getByText(/Press one of the shortcuts above/)).toBeTruthy();
+
+    fireEvent.keyDown(window, { key: 'k', code: 'KeyK', ctrlKey: true });
+
+    expect(firedText()).toContain('Quick search');
+  });
+
+  it('toggles the sidebar on the shortcut assigned to it', () => {
+    const { container } = render(<App />);
+    expect(container.querySelector('.app-sidebar')).toBeTruthy();
+
+    fireEvent.keyDown(window, { key: 'b', code: 'KeyB', ctrlKey: true });
+    expect(container.querySelector('.app-sidebar')).toBeNull();
+
+    fireEvent.keyDown(window, { key: 'b', code: 'KeyB', ctrlKey: true });
+    expect(container.querySelector('.app-sidebar')).toBeTruthy();
+  });
+
+  it('fires the shortcut a user just recorded', () => {
+    render(<App />);
+    record('Save', { key: 'J', code: 'KeyJ', ctrlKey: true, altKey: true });
+
+    fireEvent.keyDown(window, { key: 'j', code: 'KeyJ', ctrlKey: true, altKey: true });
+    expect(firedText()).toContain('Save');
+  });
+
+  it('does not fire while a recorder is listening — the keyboard is its', () => {
+    const { container } = render(<App />);
+    const sidebarBefore = container.querySelector('.app-sidebar');
+
+    // Start recording on an unrelated row, then press the sidebar shortcut.
+    fireEvent.keyDown(recorderFor('Save'), { key: 'Enter' });
+    fireEvent.keyDown(window, { key: 'b', code: 'KeyB', ctrlKey: true });
+
+    expect(!!container.querySelector('.app-sidebar')).toBe(!!sidebarBefore);
+  });
+
+  it('ignores a chord nothing is bound to', () => {
+    render(<App />);
+    fireEvent.keyDown(window, { key: 'q', code: 'KeyQ', ctrlKey: true, altKey: true });
+    expect(screen.getByText(/Press one of the shortcuts above/)).toBeTruthy();
+  });
+});
+
+describe('a settled recording always says so', () => {
+  it('acknowledges a re-record of the value already held', () => {
+    render(<App />);
+    // The row already holds Mod+B; without a note this looks like a rejection.
+    record('Toggle sidebar', { key: 'b', code: 'KeyB', ctrlKey: true });
+    expect(within(rowFor('Toggle sidebar')).getByText(/unchanged/)).toBeTruthy();
+  });
+
+  it('acknowledges a new value, a clear, and a cancel', () => {
+    render(<App />);
+
+    record('Save', { key: 'J', code: 'KeyJ', ctrlKey: true, altKey: true });
+    expect(within(rowFor('Save')).getByText(/saved/)).toBeTruthy();
+
+    fireEvent.click(screen.getByLabelText('Clear the shortcut for Quick search'));
+    expect(within(rowFor('Quick search')).getByText(/cleared/)).toBeTruthy();
+
+    const control = recorderFor('Add comment');
+    fireEvent.keyDown(control, { key: 'Enter' });
+    fireEvent.keyDown(control, { key: 'Escape' });
+    expect(within(rowFor('Add comment')).getByText(/cancelled/)).toBeTruthy();
   });
 });
 

@@ -19,6 +19,7 @@
   --cap-line: #d1d5db;
   --cap-shadow: 0 1px 0 #d1d5db;
   --code-bg: #f3f4f6;
+  --ok: #15803d;
   --radius: 10px;
 }
 
@@ -38,6 +39,7 @@
     --cap-line: #38415a;
     --cap-shadow: 0 1px 0 #0a0d14;
     --code-bg: #1a2230;
+    --ok: #6ee7a8;
   }
 }
 
@@ -325,4 +327,51 @@ footer {
 
 footer a {
   color: var(--accent);
+}
+
+/* ---- the settled-recording note --------------------------------------- */
+
+.note-flash.ok {
+  color: var(--ok);
+}
+
+.note-flash.muted {
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* ---- the pretend application ------------------------------------------ */
+
+.app {
+  display: flex;
+  min-height: 132px;
+}
+
+.app-sidebar {
+  width: 128px;
+  flex: none;
+  border-right: 1px solid var(--line);
+  padding: 14px 16px;
+  font-size: 13px;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  text-align: center;
+}
+
+.app-main p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.fired {
+  color: var(--ok);
 }
