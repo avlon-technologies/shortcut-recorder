@@ -1,8 +1,14 @@
 # @avlon/shortcut-recorder
 
+[![npm](https://img.shields.io/npm/v/@avlon/shortcut-recorder.svg)](https://www.npmjs.com/package/@avlon/shortcut-recorder)
+[![license](https://img.shields.io/npm/l/@avlon/shortcut-recorder.svg)](LICENSE)
+[![types](https://img.shields.io/badge/types-included-blue.svg)](dist/index.d.ts)
+
 Capture user-defined keyboard shortcuts, normalize them into a portable form,
 render readable keycaps, and report assignment problems — without imposing a
 visual style or a UI framework.
+
+**[Live demo →](https://mikekangdev.github.io/shortcut-recorder/)**
 
 - **Framework-agnostic core.** The capture semantics are plain TypeScript with
   no DOM and no framework. The React adapter is a thin wrapper over it.
@@ -177,10 +183,21 @@ than made silently, and closed by an architecture change under
 `continuum/changes/` rather than by drifting the code away from the model.
 
 ```sh
-npm run verify      # typecheck, unit tests, then the acceptance scenarios
+npm run verify      # build, typecheck, unit tests, then the acceptance scenarios
 npm test            # unit tests
 npm run acceptance  # build, then the acceptance scenarios against dist/
+npm run demo        # the demo page, watched and served on :5173
 ```
+
+## Contributing
+
+`npm run verify` is the gate. The demo under [`demo/`](demo/) has its own
+[README](demo/README.md) and is covered by `tests/demo.test.tsx`.
+
+An architectural change goes through the model rather than around it: pin the
+current checkpoint (`continuum ledger current continuum`), author an
+`.adl-change`, and let the toolchain prove it applies. Decisions the model does
+not declare belong in `continuum/gaps/`, not in a code comment.
 
 ## License
 

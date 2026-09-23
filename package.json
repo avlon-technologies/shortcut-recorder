@@ -2,7 +2,26 @@
   "name": "@avlon/shortcut-recorder",
   "version": "0.1.0",
   "description": "Capture, normalize, present and validate user-defined keyboard shortcuts. Framework-agnostic core, thin React adapter, headless by default.",
+  "keywords": [
+    "keyboard",
+    "shortcut",
+    "hotkey",
+    "keybinding",
+    "recorder",
+    "headless",
+    "react",
+    "a11y"
+  ],
+  "homepage": "https://mikekangdev.github.io/shortcut-recorder/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikekangdev/shortcut-recorder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mikekangdev/shortcut-recorder/issues"
+  },
   "license": "MIT",
+  "author": "Avlon",
   "type": "module",
   "sideEffects": false,
   "files": [
@@ -22,13 +41,22 @@
   },
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "acceptance": "npm run build && node continuum/acceptance/run.mjs --adapter continuum/acceptance/adapter.mjs",
-    "verify": "npm run typecheck && npm run test && npm run acceptance"
+    "verify": "npm run build && npm run typecheck && npm run test && npm run acceptance",
+    "demo": "npm run build && node demo/build.mjs --serve",
+    "demo:build": "npm run build && node demo/build.mjs",
+    "prepublishOnly": "npm run verify"
   },
   "peerDependencies": {
     "react": ">=18"
@@ -46,18 +74,9 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "esbuild": "^0.28.2"
   },
-  "keywords": [
-    "keyboard",
-    "shortcut",
-    "hotkey",
-    "keybinding",
-    "recorder",
-    "headless",
-    "react",
-    "a11y"
-  ],
   "allowScripts": {
     "esbuild@0.28.2": true
   }
