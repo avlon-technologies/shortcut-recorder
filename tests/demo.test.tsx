@@ -36,9 +36,19 @@ function capsFor(label: string): string[] {
   return [...recorderFor(label).querySelectorAll('kbd')].map((k) => k.textContent ?? '');
 }
 
-/** What the pretend application currently reports as fired. */
-function firedText(): string {
-  return document.querySelector('.fired')?.textContent ?? '';
+/** The overlay the palette and search commands open, if one is open. */
+function overlay(): HTMLElement | null {
+  return document.querySelector('.overlay');
+}
+
+/** What the editor's status bar reports — 'Saved' or 'Unsaved changes'. */
+function saveState(): string {
+  return document.querySelector('.app-bar .state')?.textContent ?? '';
+}
+
+/** The documents the editor currently holds, by title. */
+function docTitles(): string[] {
+  return [...document.querySelectorAll('.app-sidebar .doc')].map((b) => b.textContent ?? '');
 }
 
 /** Record a chord into a command's recorder the way a keyboard user would. */
@@ -159,11 +169,12 @@ describe('recording in the demo', () => {
 describe('the shortcuts actually fire', () => {
   it('runs the matching command on a bare keypress, with nothing focused', () => {
     render(<App />);
-    expect(screen.getByText(/Press one of the shortcuts above/)).toBeTruthy();
+    expect(overlay()).toBeNull();
 
     fireEvent.keyDown(window, { key: 'k', code: 'KeyK', ctrlKey: true });
 
-    expect(firedText()).toContain('Quick search');
+    // Mod+K is Quick search, and Quick search opens the search overlay.
+    expect(screen.getByRole('dialog', { name: 'Search documents' })).toBeTruthy();
   });
 
   it('toggles the sidebar on the shortcut assigned to it', () => {
@@ -181,8 +192,12 @@ describe('the shortcuts actually fire', () => {
     render(<App />);
     record('Save', { key: 'J', code: 'KeyJ', ctrlKey: true, altKey: true });
 
+    // Saving is only observable against an unsaved document, so make one.
+    fireEvent.change(screen.getByLabelText('Body of Welcome'), { target: { value: 'edited' } });
+    expect(saveState()).toBe('Unsaved changes');
+
     fireEvent.keyDown(window, { key: 'j', code: 'KeyJ', ctrlKey: true, altKey: true });
-    expect(firedText()).toContain('Save');
+    expect(saveState()).toBe('Saved');
   });
 
   it('does not fire while a recorder is listening — the keyboard is its', () => {
@@ -199,7 +214,12 @@ describe('the shortcuts actually fire', () => {
   it('ignores a chord nothing is bound to', () => {
     render(<App />);
     fireEvent.keyDown(window, { key: 'q', code: 'KeyQ', ctrlKey: true, altKey: true });
-    expect(screen.getByText(/Press one of the shortcuts above/)).toBeTruthy();
+
+    // Nothing the application can do has happened: no overlay, no new
+    // document, and the editor is where it started.
+    expect(overlay()).toBeNull();
+    expect(docTitles()).toEqual(['Welcome']);
+    expect(saveState()).toBe('Saved');
   });
 });
 

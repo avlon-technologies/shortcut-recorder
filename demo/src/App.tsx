@@ -9,13 +9,8 @@ import {
 } from '../../dist/index.js';
 import type { ExistingBinding, Platform, Shortcut } from '../../dist/index.js';
 import { useShortcutRecorder } from '../../dist/react/index.js';
-
-/** One row of the settings panel. The demo's own shape, not the package's. */
-interface Command {
-  id: string;
-  label: string;
-  shortcut: Shortcut | null;
-}
+import { MiniApp } from './MiniApp.js';
+import type { Command, MiniAppApi } from './MiniApp.js';
 
 const INITIAL: Command[] = [
   { id: 'palette', label: 'Command palette', shortcut: 'Mod+Shift+P' },
@@ -40,8 +35,7 @@ export function App() {
 
   const [commands, setCommands] = useState<Command[]>(INITIAL);
   const [recordingId, setRecordingId] = useState<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [fired, setFired] = useState<Command | null>(null);
+  const app = useRef<MiniAppApi | null>(null);
 
   const assign = (id: string, shortcut: Shortcut | null) =>
     setCommands((current) => current.map((c) => (c.id === id ? { ...c, shortcut } : c)));
@@ -52,8 +46,17 @@ export function App() {
     // While a recorder is listening, the keyboard belongs to it.
     enabled: recordingId === null,
     onFire: (command) => {
-      setFired(command);
-      if (command.id === 'sidebar') setSidebarOpen((open) => !open);
+      const api = app.current;
+      if (!api) return;
+      const action = {
+        palette: api.openPalette,
+        search: api.openSearch,
+        save: api.save,
+        new: api.newDoc,
+        sidebar: api.toggleSidebar,
+        comment: api.addComment,
+      }[command.id];
+      action?.();
     },
   });
 
@@ -74,7 +77,22 @@ export function App() {
       </header>
 
       <section>
-        <h2>Try it</h2>
+        <h2>A real app</h2>
+        <div className="panel">
+          <MiniApp commands={commands} platform={platform} apiRef={app} />
+        </div>
+        <p className="caption">
+          A real editor, driven entirely by the shortcuts below. Toggle the sidebar, open the
+          palette, save, add a document or a comment — then rebind one and it takes effect
+          immediately. Matching is the application's job, not the library's: the package records
+          shortcuts and never listens for them, and the nine lines that do the listening are in the
+          code at the bottom of this page. Dispatch uses your <em>real</em> platform, so the
+          platform switch below changes how shortcuts read without changing which keys fire them.
+        </p>
+      </section>
+
+      <section>
+        <h2>…and you rebind them here</h2>
         <div className="panel bindings">
           <div className="switch">
             <span className="label">Pretend I am on</span>
@@ -107,37 +125,8 @@ export function App() {
         <p className="caption">
           Focus a shortcut and press <kbd>Enter</kbd> to record, then any combination. Escape cancels
           and leaves the old value alone. Try assigning two commands the same shortcut, or something
-          the browser keeps for itself like <kbd>Ctrl</kbd> <kbd>T</kbd> — every shortcut here
-          fires, so a reserved one is the only way to get a warning.
-        </p>
-      </section>
-
-      <section>
-        <h2>…and they fire</h2>
-        <div className="panel">
-          <div className="app" aria-label="Pretend application">
-            {sidebarOpen && (
-              <aside className="app-sidebar">
-                <span className="muted">Sidebar</span>
-              </aside>
-            )}
-            <div className="app-main">
-              {fired ? (
-                <p className="fired">
-                  <strong>{fired.label}</strong> fired
-                  {fired.shortcut && <span className="muted"> — {fired.shortcut}</span>}
-                </p>
-              ) : (
-                <p className="muted">Press one of the shortcuts above. Nothing needs focus.</p>
-              )}
-            </div>
-          </div>
-        </div>
-        <p className="caption">
-          Matching is the application's job, not the library's — the package records shortcuts, it
-          never listens for them. The nine lines that do it here are below. Dispatch uses your{' '}
-          <em>real</em> platform, so the preview switch above changes how shortcuts read without
-          changing which keys fire them.
+          the browser keeps for itself like <kbd>Ctrl</kbd> <kbd>T</kbd> — every shortcut here drives
+          the app above, so a reserved one is the only way to get a warning.
         </p>
       </section>
 
@@ -189,6 +178,14 @@ function useDispatch({
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.repeat || isModifierKey(event.key)) return;
+
+      // Typing in a field is typing, not a shortcut — unless a modifier is
+      // held. Any real dispatcher needs this; it is not the library's job.
+      const target = event.target as HTMLElement | null;
+      const typing =
+        target?.isContentEditable === true ||
+        /^(input|textarea|select)$/i.test(target?.tagName ?? '');
+      if (typing && !event.ctrlKey && !event.metaKey && !event.altKey) return;
 
       let pressed: Shortcut;
       try {
