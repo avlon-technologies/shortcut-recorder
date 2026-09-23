@@ -42,9 +42,9 @@ export function App() {
           framework.
         </p>
         <nav className="links">
-          <a href="https://github.com/mikekangdev/shortcut-recorder">GitHub</a>
+          <a href="https://github.com/avlon-technologies/shortcut-recorder">GitHub</a>
           <a href="https://www.npmjs.com/package/@avlon/shortcut-recorder">npm</a>
-          <a href="https://github.com/mikekangdev/shortcut-recorder#readme">Docs</a>
+          <a href="https://github.com/avlon-technologies/shortcut-recorder#readme">Docs</a>
         </nav>
       </header>
 
@@ -100,7 +100,7 @@ export function App() {
 
       <footer>
         MIT licensed. Built against a{' '}
-        <a href="https://github.com/mikekangdev/shortcut-recorder/tree/main/continuum">
+        <a href="https://github.com/avlon-technologies/shortcut-recorder/tree/main/continuum">
           Continuum architecture package
         </a>
         , so what the code means is written down and checked.

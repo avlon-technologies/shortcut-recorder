@@ -8,7 +8,7 @@ Capture user-defined keyboard shortcuts, normalize them into a portable form,
 render readable keycaps, and report assignment problems — without imposing a
 visual style or a UI framework.
 
-**[Live demo →](https://mikekangdev.github.io/shortcut-recorder/)**
+**[Live demo →](https://avlon-technologies.github.io/shortcut-recorder/)**
 
 - **Framework-agnostic core.** The capture semantics are plain TypeScript with
   no DOM and no framework. The React adapter is a thin wrapper over it.

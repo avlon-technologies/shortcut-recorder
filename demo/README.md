@@ -1,7 +1,7 @@
 # Demo
 
 The page published at
-**[mikekangdev.github.io/shortcut-recorder](https://mikekangdev.github.io/shortcut-recorder/)**.
+**[avlon-technologies.github.io/shortcut-recorder](https://avlon-technologies.github.io/shortcut-recorder/)**.
 
 It is a keyboard-shortcuts settings panel: six commands, each with a recorder,
 live conflict detection across the list, browser-reserved warnings, and a

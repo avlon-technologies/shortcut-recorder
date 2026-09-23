@@ -12,13 +12,13 @@
     "react",
     "a11y"
   ],
-  "homepage": "https://mikekangdev.github.io/shortcut-recorder/",
+  "homepage": "https://avlon-technologies.github.io/shortcut-recorder/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mikekangdev/shortcut-recorder.git"
+    "url": "git+https://github.com/avlon-technologies/shortcut-recorder.git"
   },
   "bugs": {
-    "url": "https://github.com/mikekangdev/shortcut-recorder/issues"
+    "url": "https://github.com/avlon-technologies/shortcut-recorder/issues"
   },
   "license": "MIT",
   "author": "Avlon",
