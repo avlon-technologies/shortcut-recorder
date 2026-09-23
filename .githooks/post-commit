@@ -1,0 +1,5 @@
+#!/bin/sh
+# continuum-managed-hook/1 — installed by `continuum install`; do not edit. Put your own post-commit logic in .githooks/post-commit.local (it runs first).
+d=$(dirname "$0")
+if [ -f "$d/post-commit.local" ]; then sh "$d/post-commit.local" "$@" || exit $?; fi
+exec node "C:/projects/avlon/continuum/tools/continuum.mjs" guard post-commit "$@"

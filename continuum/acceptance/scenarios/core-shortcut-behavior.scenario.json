@@ -1,0 +1,67 @@
+{
+  "acceptance-scenario": "1",
+  "name": "core-shortcut-behavior",
+  "purpose": "The core records and normalizes a shortcut, formats readable keycaps, cancels with Escape, and reports conflicts and reserved-shortcut warnings.",
+  "verifies": [
+    "::ShortcutRecorder.ShortcutConfiguration.Recording.EscapeCancellation",
+    "::ShortcutRecorder.ShortcutConfiguration.Recording.KeyboardAccessibility",
+    "::ShortcutRecorder.ShortcutConfiguration.Normalization.PortableModifier",
+    "::ShortcutRecorder.ShortcutConfiguration.Presentation.PrettyKeycaps",
+    "::ShortcutRecorder.ShortcutConfiguration.AssignmentSafety.CollisionDetection",
+    "::ShortcutRecorder.ShortcutConfiguration.AssignmentSafety.ReservedShortcutWarning",
+    "::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine"
+  ],
+  "test": "::ShortcutRecorder.CoreBehavior",
+  "environment": "PackageDevelopment",
+  "given": [
+    {
+      "step": "recorder.has-existing-bindings",
+      "args": {
+        "bindings": [
+          { "id": "search", "shortcut": "Mod+K" }
+        ]
+      },
+      "text": "Search is already assigned to Mod+K"
+    },
+    {
+      "step": "recorder.starts",
+      "text": "recording starts from the keyboard"
+    }
+  ],
+  "when": [
+    {
+      "step": "recorder.presses-chord",
+      "args": {
+        "platform": "macos",
+        "key": "P",
+        "meta": true,
+        "shift": true
+      },
+      "text": "the user presses Command+Shift+P"
+    }
+  ],
+  "then": [
+    {
+      "step": "recorder.normalized-value-is",
+      "args": { "shortcut": "Mod+Shift+P" },
+      "text": "the portable value is Mod+Shift+P"
+    },
+    {
+      "step": "recorder.keycaps-are-readable",
+      "text": "the shortcut is presented as readable platform keycaps"
+    },
+    {
+      "step": "recorder.conflict-is-reported",
+      "args": { "candidate": "Mod+K", "bindingId": "search" },
+      "text": "an already assigned shortcut identifies the conflicting binding"
+    },
+    {
+      "step": "recorder.reserved-shortcut-warns",
+      "text": "a recognized browser-reserved shortcut is surfaced as a warning"
+    },
+    {
+      "step": "recorder.escape-cancels",
+      "text": "Escape cancels an active recording without changing the committed value"
+    }
+  ]
+}

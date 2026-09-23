@@ -1,0 +1,11 @@
+{
+  "adl-json": "adl-json/1.0",
+  "manifest": {
+    "name": "open.shortcutrecorder",
+    "version": "package-1",
+    "core": "adl/1.4",
+    "imports": [],
+    "extensions": [],
+    "documents": ["shortcut-recorder.adl"]
+  }
+}

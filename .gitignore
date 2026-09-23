@@ -1,0 +1,5 @@
+.continuum/
+continuum/.guard/
+node_modules/
+dist/
+*.tsbuildinfo

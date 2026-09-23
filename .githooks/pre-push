@@ -1,0 +1,5 @@
+#!/bin/sh
+# continuum-managed-hook/1 — installed by `continuum install`; do not edit. Put your own pre-push logic in .githooks/pre-push.local (it runs first).
+d=$(dirname "$0")
+if [ -f "$d/pre-push.local" ]; then sh "$d/pre-push.local" "$@" || exit $?; fi
+exec node "C:/projects/avlon/continuum/tools/continuum.mjs" guard pre-push "$@"

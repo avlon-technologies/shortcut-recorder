@@ -1,0 +1,96 @@
+{
+  "development-package": "continuum-development-package/1",
+  "name": "shortcut-recorder",
+  "generator": {
+    "tool": "tools/development-package.mjs",
+    "version": "0.1.0"
+  },
+  "goal": "GOAL.md",
+  "semantic": {
+    "package": "open.shortcutrecorder",
+    "version": "package-1",
+    "core": "adl/1.4",
+    "attestation": "sha256:20c5c49378aaa14d877f27568f11470a4cb645484cf21ce7a860607898c36822",
+    "changeState": "sha256:4d2824016cdf4e787171c5dfecc127ef6b10d6613a0d35ab3751974d1ce3e71f",
+    "manifest": "model/shortcut-recorder.adl-manifest.json",
+    "documents": [
+      "model/shortcut-recorder.adl"
+    ],
+    "textProjection": "model/shortcut-recorder.adl.txt",
+    "proof": "model/compile-proof.json",
+    "warnings": 0
+  },
+  "change": null,
+  "environment": {
+    "name": "PackageDevelopment",
+    "id": "663e3ff6-f583-4281-89d0-91a9c9c27c4c",
+    "document": "model/package-development.adl-binding.json",
+    "bindingDigest": "sha256:4b3d3949cbb6ca3ea6e6b5fd94c9bc53cb733fc27551911ee745d5b6742b9758"
+  },
+  "environments": [
+    {
+      "name": "PackageDevelopment",
+      "id": "663e3ff6-f583-4281-89d0-91a9c9c27c4c",
+      "document": "model/package-development.adl-binding.json",
+      "bindingDigest": "sha256:4b3d3949cbb6ca3ea6e6b5fd94c9bc53cb733fc27551911ee745d5b6742b9758"
+    }
+  ],
+  "bindings": [
+    "model/package-development.adl-binding.json"
+  ],
+  "vocabularies": [
+    "model/open.shortcutrecorder.bindings.package.vocabulary-claims.json"
+  ],
+  "acceptance": {
+    "scenarios": "acceptance/scenarios",
+    "runner": "acceptance/run.mjs",
+    "fakeProvider": "acceptance/fake-model-provider.mjs",
+    "adapter": "acceptance/adapter.mjs",
+    "count": 2,
+    "names": [
+      "core-shortcut-behavior",
+      "integration-contract"
+    ],
+    "traces": [],
+    "executed": false,
+    "results": null,
+    "uncoveredRequirements": []
+  },
+  "implementation": "IMPLEMENTATION.md",
+  "behaviour": {
+    "document": "BEHAVIOUR.md",
+    "starts": 0,
+    "underspecified": 0
+  },
+  "readme": "README.md",
+  "controls": [],
+  "generated": [
+    "BEHAVIOUR.md",
+    "IMPLEMENTATION.md",
+    "README.md",
+    "acceptance/README.md",
+    "acceptance/fake-model-provider.mjs",
+    "acceptance/run.mjs",
+    "model/compile-proof.json",
+    "model/shortcut-recorder.adl.txt"
+  ],
+  "files": {
+    "BEHAVIOUR.md": "sha256:1b8016a49ab14e50c0c9ec422ed240d419aafa535f96bb9c5fce50f771875ea8",
+    "GOAL.md": "sha256:bc2cd7d39fc7e6882d1bf220381c5a924a11ad39b0e4100bc7268a01241f8aff",
+    "IMPLEMENTATION.md": "sha256:83d2f180da58f176414cc74670a8f98eb003f4fa20930083d65b9196929a0b88",
+    "README.md": "sha256:a50d3f715cce8d9aeedf72951e5446c13a376e5240e6d2d1840896941f5e2ca0",
+    "acceptance/README.md": "sha256:3d6ec72fb6a4afb9a4df2af3514edb709669367ac81ce8e34a05130f7416451a",
+    "acceptance/adapter.mjs": "sha256:fd598ca26563f26cfc5beb07a1a3c6a8684c592304025ed7e0b6b73b323e0b2c",
+    "acceptance/fake-model-provider.mjs": "sha256:d2ec0ce524ca996865beef2c339c205deb9d7ad2610a1e7ff72a1b7732781b69",
+    "acceptance/run.mjs": "sha256:447dac8db77b8e1d93382e778b52ebd4fead29f0ef62b05e3a924717dea01370",
+    "acceptance/scenarios/core-shortcut-behavior.scenario.json": "sha256:f2e062e636c76b1112485d147630fd37e68197d8b4a83d41c9639b07dcb8ef49",
+    "acceptance/scenarios/integration-contract.scenario.json": "sha256:8c17c882d458116108333618105e5864a3b2cdae2b0466f20a06477578330178",
+    "development-package.json": "sha256:33b1088b23f7c16d4996b5e003185121264fd716b46c6b1f34559a48ddc63c3e",
+    "model/compile-proof.json": "sha256:b2bc0f870dccf351e539cf92590fc70acdb69ef8b1fbc9a1f8b35c92705b4935",
+    "model/open.shortcutrecorder.bindings.package.vocabulary-claims.json": "sha256:10f6519e4772ca296acc6b91f94bc71f4ef7ca84e43ed7582be50cb30fade1b2",
+    "model/package-development.adl-binding.json": "sha256:356f65d1d574315816d7d861ddc892412d4fd86e67b55364fb60449501909f39",
+    "model/shortcut-recorder.adl": "sha256:1f3bbd3961f44460a11585977887a03b5b7d02445739b657a27737f92301b7eb",
+    "model/shortcut-recorder.adl-manifest.json": "sha256:37c9b42a851f3871c643b7f36a867624e8c5eedeabc3e1683bf4724cf8548ec0",
+    "model/shortcut-recorder.adl.txt": "sha256:546201d03d3630709842e966f567f36d50ac092654e15908c631de26518a4908"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "acceptance-scenario": "1",
+  "name": "integration-contract",
+  "purpose": "The package exposes a framework-agnostic headless core, a thin React integration, controlled and uncontrolled state, and safe server rendering.",
+  "verifies": [
+    "::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.ControlledAndUncontrolled",
+    "::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.HeadlessByDefault",
+    "::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.ServerRenderingSafe",
+    "::ShortcutRecorder.ShortcutConfiguration.IntegrationContract.FrameworkAgnosticCore",
+    "::ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine"
+  ],
+  "test": "::ShortcutRecorder.IntegrationBehavior",
+  "environment": "PackageDevelopment",
+  "given": [
+    {
+      "step": "package.imports-core-without-ui-framework",
+      "text": "the shortcut core is imported without a UI framework"
+    }
+  ],
+  "when": [
+    {
+      "step": "package.imports-during-server-rendering",
+      "text": "the core and React integration are imported in a server-rendering context"
+    }
+  ],
+  "then": [
+    {
+      "step": "package.server-import-is-safe",
+      "text": "importing does not require browser globals"
+    },
+    {
+      "step": "react.supports-controlled-state",
+      "text": "the React integration accepts caller-controlled shortcut state"
+    },
+    {
+      "step": "react.supports-uncontrolled-state",
+      "text": "the React integration can manage shortcut state internally"
+    },
+    {
+      "step": "react.is-headless-by-default",
+      "text": "the integration does not require package-defined styling"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "development-package-proof": "1",
+  "normative": false,
+  "note": "the compiler's result relayed by tools/development-package.mjs — diagnostics and the ledger have no ratified wire form; the attestation and changeState are the engines' own digests",
+  "package": {
+    "name": "open.shortcutrecorder",
+    "version": "package-1",
+    "core": "adl/1.4",
+    "documents": [
+      "shortcut-recorder.adl"
+    ]
+  },
+  "ok": true,
+  "attestation": "sha256:20c5c49378aaa14d877f27568f11470a4cb645484cf21ce7a860607898c36822",
+  "changeState": "sha256:4d2824016cdf4e787171c5dfecc127ef6b10d6613a0d35ab3751974d1ce3e71f",
+  "ledger": {
+    "passed": 73,
+    "failed": 0,
+    "notEvaluated": 0,
+    "byReason": {}
+  },
+  "warnings": [],
+  "errors": [],
+  "derivedFrom": null,
+  "binding": {
+    "environments": [
+      {
+        "name": "PackageDevelopment",
+        "id": "663e3ff6-f583-4281-89d0-91a9c9c27c4c",
+        "document": "model/package-development.adl-binding.json",
+        "completeness": "passed",
+        "bindingDigest": "sha256:4b3d3949cbb6ca3ea6e6b5fd94c9bc53cb733fc27551911ee745d5b6742b9758",
+        "notEvaluated": []
+      }
+    ],
+    "claims": [
+      {
+        "vocabulary": "open.shortcutrecorder.bindings.package package-1",
+        "digest": "sha256:189661f10e3333937d98be7dc771a3505e58f778dfa0ca0f12acea40a1ce1773"
+      }
+    ],
+    "secretMaterial": {
+      "status": "not-evaluated",
+      "reason": "unresolved-normative-dependency",
+      "detail": "R12-1"
+    },
+    "unboundEnvironments": []
+  }
+}

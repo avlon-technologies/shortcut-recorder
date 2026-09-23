@@ -1,0 +1,5 @@
+#!/bin/sh
+# continuum-managed-hook/1 — installed by `continuum install`; do not edit. Put your own pre-commit logic in .githooks/pre-commit.local (it runs first).
+d=$(dirname "$0")
+if [ -f "$d/pre-commit.local" ]; then sh "$d/pre-commit.local" "$@" || exit $?; fi
+exec node "C:/projects/avlon/continuum/tools/continuum.mjs" guard pre-commit "$@"

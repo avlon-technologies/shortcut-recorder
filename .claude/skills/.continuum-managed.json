@@ -1,0 +1,12 @@
+{
+  "continuum-managed-skills": "1",
+  "skills": {
+    "continuum": "sha256:e706eeba5beba02f9b56996fc8376cd58eefeb5113a71d61b86de99befe8bff4",
+    "understand-architecture": "sha256:32f91a4bdebce105c6b80e94f7035c3f436eeb3d2eea8c9b5c0beb8eddc03c34",
+    "author-architecture": "sha256:e809ea7e2668c240ae2a587b7faf48c44b379308cd479df83be00bf94ec30f07",
+    "change-architecture": "sha256:8138280585a6c94a8ada757d2c3e20d92ccfe05554b142cbabea5059078530b8",
+    "recover-architecture": "sha256:92a9e4ce2fd0df17fd31f8ae9cb6a63d16f60886cf1a76ac30d0c8ac99bd1e5b",
+    "development-package": "sha256:9171fec0226803691fd560d7cb8becd969dbbb82489ff21b5cc6fdc59ea3656e",
+    "reconcile-architecture": "sha256:66c079a35f29f356d00fc27b1b91c455cb86e7025fffe99a3c6e3dd27ee137ea"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "adl-json": "adl-json/1.0",
+  "document": {
+    "universe": "binding",
+    "base": {
+      "package": "open.shortcutrecorder",
+      "version": "package-1",
+      "canonicalModel": "sha256:20c5c49378aaa14d877f27568f11470a4cb645484cf21ce7a860607898c36822"
+    },
+    "vocabularies": [
+      {
+        "name": "open.shortcutrecorder.bindings.package",
+        "version": "package-1"
+      }
+    ],
+    "environment": {
+      "ref": "663e3ff6-f583-4281-89d0-91a9c9c27c4c",
+      "hint": "ShortcutRecorder.PackageDevelopment"
+    },
+    "bindings": [
+      {
+        "kind": "Binding",
+        "id": "084acad8-699c-4e48-8863-f01d9d3d3165",
+        "name": "B1",
+        "description": "Realizes the shortcut engine as a TypeScript library with a framework-agnostic core and thin React adapter; package styling remains headless.",
+        "attributes": {
+          "vocabulary": "open.shortcutrecorder.bindings.package",
+          "technology": "typescript-library",
+          "configuration": {
+            "language": "typescript",
+            "moduleFormat": "esm",
+            "core": "framework-agnostic",
+            "reactAdapter": "thin-wrapper",
+            "styling": "headless"
+          }
+        },
+        "relationships": {
+          "binds": {
+            "ref": "58320b7e-f3f8-4f64-9417-e20e8dd1a318",
+            "hint": "ShortcutRecorder.ShortcutConfiguration.Shortcuts.ShortcutEngine"
+          }
+        }
+      }
+    ]
+  }
+}

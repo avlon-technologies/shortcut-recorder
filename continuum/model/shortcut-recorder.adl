@@ -1,0 +1,138 @@
+document semantic at :: {
+
+system ShortcutRecorder #575a473b-67b8-43a6-a71e-b4e676fa7278 {
+  desc "A reusable shortcut-recording system that captures, normalizes, presents, and validates user-defined keyboard shortcuts."
+
+  actor Maintainers #bf422242-ac4b-49be-be45-bb387c41a45d [team] {
+    desc "The team accountable for the shortcut-recording package and its public contract."
+    owns: ShortcutConfiguration, ShortcutConfiguration.Shortcuts, ShortcutConfiguration.Shortcuts.ShortcutEngine
+  }
+
+  domain ShortcutConfiguration #f6a51635-137a-4be5-99ea-17e2a9a6034b {
+    desc "The business meaning of defining and validating user-configurable keyboard shortcuts."
+    classification = core
+
+    capability Recording #6beaf44c-7a01-458f-b9ca-1c957075a26e {
+      desc "Capture a user's keyboard shortcut candidate through keyboard-only interaction."
+      requirement EscapeCancellation #b919c692-35c2-4b10-9116-d0569acaa0b9 {
+        desc "Escape cancels an active recording without replacing the committed shortcut."
+      }
+      requirement KeyboardAccessibility #48d1049f-50aa-4974-9bd1-2a5380ca22e4 {
+        desc "Shortcut recording is operable by keyboard and exposes an accessible interaction contract."
+      }
+    }
+
+    capability Normalization #262823da-c0af-4385-83b9-58c053778580 {
+      desc "Convert captured key combinations into a stable portable shortcut representation."
+      requirement PortableModifier #99b7e7c2-e850-4b05-944f-512eb64b0994 {
+        desc "The portable Mod modifier represents Command on macOS and Control on other supported platforms."
+      }
+    }
+
+    capability Presentation #cb02706e-f7a7-41d8-9e82-1ec99fba77d7 {
+      desc "Present a normalized shortcut as readable keycap labels."
+      requirement PrettyKeycaps #bbb5f877-df76-4fd0-ad35-0562fdf70be2 {
+        desc "Normalized shortcuts can be rendered as platform-appropriate keycap labels such as Command, Shift, and P."
+      }
+    }
+
+    capability AssignmentSafety #f98f1fa9-5b85-4616-9e2c-ce58e7014fff {
+      desc "Assess whether a proposed shortcut conflicts with an existing assignment or a reserved browser shortcut."
+      requirement CollisionDetection #b0969156-3863-46bf-b38b-7ec60f66ddf3 {
+        desc "A shortcut already assigned to another binding is reported as a conflict identifying that binding."
+      }
+      requirement ReservedShortcutWarning #9256c0dd-f043-48a2-9353-a9b985e1a646 {
+        desc "A recognized browser-reserved shortcut is reported with a warning."
+      }
+    }
+
+    capability IntegrationContract #78a0f9c9-3a8b-4755-bd27-2edf35aa55ab {
+      desc "Expose the recorder through a portable integration contract suitable for framework adapters."
+      requirement ControlledAndUncontrolled #408dcddd-50df-4f24-9e8f-105a5ec3cbe7 {
+        desc "The integration contract supports both caller-controlled and internally managed shortcut state."
+      }
+      requirement HeadlessByDefault #efdb0ac2-e555-4ace-9c5f-4f91bce795ee {
+        desc "The integration contract does not require package-defined visual styling."
+      }
+      requirement ServerRenderingSafe #86800933-440b-46cb-9a06-bbc6a46fb83c {
+        desc "Importing and rendering the integration does not require browser globals during server rendering."
+      }
+      requirement FrameworkAgnosticCore #3e4d764a-e8f4-456a-a643-76b75b3b5742 {
+        desc "Shortcut capture semantics are available independently of any specific UI framework adapter."
+      }
+    }
+
+    bounded-context Shortcuts #8c6d1529-5f2e-4358-9017-dbda5a1a84c9 {
+      desc "The authoritative language and behavior for captured shortcut chords, normalization, display, and assignment assessment."
+      realizes: ShortcutConfiguration.Recording, ShortcutConfiguration.Normalization, ShortcutConfiguration.Presentation, ShortcutConfiguration.AssignmentSafety, ShortcutConfiguration.IntegrationContract
+
+      alias Shortcut v1 #99b13ad2-d812-42e7-b7b4-39f0272c1316 = text !identity
+      enum Platform v1 #6891a68d-a4f7-422b-8014-f84c8dad262d = macos | other
+      record RawChord v1 #03dddcba-738c-4f8c-be8d-7cb567406fd4 { key: text, control: boolean, alt: boolean, shift: boolean, meta: boolean }
+      record ExistingBinding v1 #752d09f3-e816-43fc-9719-e593a76658b1 { id: text, shortcut: Shortcut }
+      record NormalizeInput v1 #6e555cdc-1eef-497d-b76d-a54f7acb9eb4 { chord: RawChord, platform: Platform }
+      record AssessmentInput v1 #c1601d56-0b91-4439-899e-8b01a621b094 { shortcut: Shortcut, existing: list(ExistingBinding), platform: Platform }
+      record Conflict v1 #76667b2a-5c14-4407-bf83-5e28e3080546 { bindingId: text, shortcut: Shortcut }
+      record Assessment v1 #3053a974-d7e5-4fa7-b06f-6be30b1bf107 { shortcut: Shortcut, conflict: optional(Conflict), reserved: boolean }
+      record KeycapDisplay v1 #168db1bd-f1a9-451a-86de-f4bb32a7c90a { text: text }
+
+      business-rule ModMapping #17d86d33-4d8a-4bc6-bd45-9709147e4dc5 {
+        desc "Defines the portable modifier mapping used during normalization."
+        statement "Mod resolves to Command on macOS and Control on other supported platforms."
+      }
+      business-rule ConflictReporting #fba97d30-7f5c-4ae4-b5a2-5c04255dc715 {
+        desc "Defines when an existing assignment is surfaced as a conflict."
+        statement "A candidate matching an existing normalized shortcut reports the matching binding as a conflict."
+      }
+      business-rule ReservedWarning #72e58521-0894-4e9f-902f-06d17ad23577 {
+        desc "Defines handling for browser-reserved shortcut candidates."
+        statement "A recognized browser-reserved shortcut produces a warning rather than being treated as an ordinary unreserved assignment."
+      }
+      business-rule EscapeCancels #d3d51971-79c4-48ab-8626-81ec41c24041 {
+        desc "Defines cancellation while recording."
+        statement "Escape cancels the active recording and leaves the committed shortcut unchanged."
+      }
+
+      service ShortcutEngine #58320b7e-f3f8-4f64-9417-e20e8dd1a318 {
+        desc "Provides framework-independent shortcut normalization, presentation, assignment assessment, and recorder semantics for adapters."
+        realizes: ShortcutConfiguration.Recording, ShortcutConfiguration.Normalization, ShortcutConfiguration.Presentation, ShortcutConfiguration.AssignmentSafety, ShortcutConfiguration.IntegrationContract
+        satisfies: ShortcutConfiguration.Recording.EscapeCancellation, ShortcutConfiguration.Recording.KeyboardAccessibility, ShortcutConfiguration.Normalization.PortableModifier, ShortcutConfiguration.Presentation.PrettyKeycaps, ShortcutConfiguration.AssignmentSafety.CollisionDetection, ShortcutConfiguration.AssignmentSafety.ReservedShortcutWarning, ShortcutConfiguration.IntegrationContract.ControlledAndUncontrolled, ShortcutConfiguration.IntegrationContract.HeadlessByDefault, ShortcutConfiguration.IntegrationContract.ServerRenderingSafe, ShortcutConfiguration.IntegrationContract.FrameworkAgnosticCore
+        applies: ModMapping, ConflictReporting, ReservedWarning, EscapeCancels
+
+        api RecorderApi #ff9fb049-86ef-4f7e-aa23-8f228838c736 {
+          desc "The synchronous semantic surface exposed to recorder adapters."
+          operation NormalizeShortcut #5b037dba-026b-4668-ad1d-ed41fe6c1015 {
+            desc "Normalizes a captured chord into the portable shortcut representation."
+            in = NormalizeInput
+            out = Shortcut
+          }
+          operation FormatShortcut #4d8f1a70-0ab5-465c-b127-0fb1cc679839 {
+            desc "Formats a normalized shortcut as readable keycap display text."
+            in = Shortcut
+            out = KeycapDisplay
+          }
+          operation AssessShortcut #f6c641dd-3928-4dab-9b39-92419b8712d6 {
+            desc "Assesses a normalized shortcut for assignment conflicts and reserved-shortcut warnings."
+            in = AssessmentInput
+            out = Assessment
+          }
+        }
+      }
+    }
+  }
+
+  environment PackageDevelopment #663e3ff6-f583-4281-89d0-91a9c9c27c4c {
+    desc "The environment used to implement and verify the reusable shortcut recorder package and its adapters."
+  }
+
+  test CoreBehavior #8fa76082-20fa-47ea-bd6b-7690403c7d27 {
+    desc "Verifies capture cancellation, accessibility, normalization, keycap presentation, conflict detection, and reserved-shortcut warnings."
+    verifies: ShortcutConfiguration.Recording.EscapeCancellation, ShortcutConfiguration.Recording.KeyboardAccessibility, ShortcutConfiguration.Normalization.PortableModifier, ShortcutConfiguration.Presentation.PrettyKeycaps, ShortcutConfiguration.AssignmentSafety.CollisionDetection, ShortcutConfiguration.AssignmentSafety.ReservedShortcutWarning, ShortcutConfiguration.Shortcuts.ShortcutEngine
+  }
+
+  test IntegrationBehavior #88682f83-adc7-4b6d-8411-449871a0cb6a {
+    desc "Verifies controlled and uncontrolled integration, headless use, server-rendering safety, and framework-independent core behavior."
+    verifies: ShortcutConfiguration.IntegrationContract.ControlledAndUncontrolled, ShortcutConfiguration.IntegrationContract.HeadlessByDefault, ShortcutConfiguration.IntegrationContract.ServerRenderingSafe, ShortcutConfiguration.IntegrationContract.FrameworkAgnosticCore, ShortcutConfiguration.Shortcuts.ShortcutEngine
+  }
+}
+}
